@@ -62,6 +62,7 @@ void CVoltMeterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1, ComboDevice);
 	DDX_Control(pDX, IDC_LIST1, ListVoltData);
 	DDX_Control(pDX, IDC_EDIT4, EditBoxMsg);
+	DDX_Control(pDX, IDC_PROGRESS1, ProgBarVolt);
 }
 
 BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
@@ -120,6 +121,8 @@ BOOL CVoltMeterDlg::OnInitDialog()
 		ComboDevice.AddString(deviceInfo);
 	}
 
+	std::thread threadProgBar(&CVoltMeterDlg::UpdateVoltVal, this);
+	threadProgBar.detach();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -173,12 +176,26 @@ HCURSOR CVoltMeterDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CVoltMeterDlg::UpdateVoltVal()
+{
+	while(true){
+		if (pMeterSession) {
+			meterMode = pMeterSession->getRange();
+			rawValue = pMeterSession->getRawValue();
+		}
+
+		ProgBarVolt.SetPos(((double)rawValue / 65535) * 100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}
+
 
 
 void CVoltMeterDlg::OnCbnSelchangeCombo1()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	curSelDev = ComboDevice.GetCurSel();
+	EditBoxMsg.SetWindowTextW(L"已选择设备!");
 }
 
 
@@ -197,6 +214,7 @@ void CVoltMeterDlg::OnBnClickedButton4()
 		);
 		meterPort.setReadIntervalTimeout(0);
 		meterPort.open();
+		meterPort.writeData("4", 1);
 
 		meterPort.disconnectReadEvent();
 		pMeterSession = std::make_unique<VoltMeterSession>(VoltMeterSession(&meterPort));

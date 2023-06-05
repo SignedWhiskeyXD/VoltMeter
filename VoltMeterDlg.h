@@ -8,6 +8,8 @@
 #include <CSerialPort/SerialPortInfo.h>
 #include "VoltMeterSession.h"
 #include <memory>
+#include <thread>
+#include <chrono>
 using namespace itas109;
 
 // CVoltMeterDlg 对话框
@@ -41,14 +43,19 @@ public:
 	CListCtrl ListVoltData;
 
 private:
+	void UpdateVoltVal();
+	
 	std::vector<SerialPortInfo> availableDevices;
 	CSerialPort meterPort;
 	std::unique_ptr<VoltMeterSession> pMeterSession;
 	int curSelDev = -1;
+
+	int meterMode = 4;
+	uint16_t rawValue = 0;
 	
 public:
 	afx_msg void OnCbnSelchangeCombo1();
 	CEdit EditBoxMsg;
 	afx_msg void OnBnClickedButton4();
-	uint16_t rawValue = 0;
+	CProgressCtrl ProgBarVolt;
 };
