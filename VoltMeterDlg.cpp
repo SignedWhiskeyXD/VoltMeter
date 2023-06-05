@@ -60,12 +60,14 @@ void CVoltMeterDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, ComboDevice);
+	DDX_Control(pDX, IDC_LIST1, ListVoltData);
 }
 
 BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_CBN_SELCHANGE(IDC_COMBO1, &CVoltMeterDlg::OnCbnSelchangeCombo1)
 END_MESSAGE_MAP()
 
 
@@ -103,6 +105,18 @@ BOOL CVoltMeterDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	ComboDevice.SetWindowTextW(L"请选择串口设备");
 
+	ListVoltData.SetExtendedStyle(ListVoltData.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
+	ListVoltData.InsertColumn(0, L"记录时间", LVCFMT_LEFT, 120);
+	ListVoltData.InsertColumn(1, L"测量值", LVCFMT_LEFT, 120);
+	ListVoltData.InsertColumn(2, L"设备名", LVCFMT_LEFT, 120);
+
+	this->availableDevices = CSerialPortInfo::availablePortInfos();
+	for (const auto& dev : availableDevices) {
+		CString deviceInfo(dev.portName);
+		deviceInfo.AppendChar(' ');
+		deviceInfo.Append(CString(dev.description));
+		ComboDevice.AddString(deviceInfo);
+	}
 
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -157,3 +171,22 @@ HCURSOR CVoltMeterDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CVoltMeterDlg::OnCbnSelchangeCombo1()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	int deviceID = ComboDevice.GetCurSel();
+	if (deviceID >= 0 && deviceID < availableDevices.size()) {
+		meterPort.init(
+			availableDevices[deviceID].portName,
+			BaudRate9600, // baudrate
+			ParityNone,   // parity
+			DataBits8,    // data bit
+			StopOne,      // stop bit
+			FlowNone,     // flow
+			4096
+		);
+		
+	}
+}

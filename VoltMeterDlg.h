@@ -3,7 +3,10 @@
 //
 
 #pragma once
-
+#include <vector>
+#include <CSerialPort/SerialPort.h>
+#include <CSerialPort/SerialPortInfo.h>
+using namespace itas109;
 
 // CVoltMeterDlg 对话框
 class CVoltMeterDlg : public CDialogEx
@@ -33,4 +36,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CComboBox ComboDevice;
+	CListCtrl ListVoltData;
+
+private:
+	std::vector<SerialPortInfo> availableDevices;
+	CSerialPort meterPort;
+public:
+	afx_msg void OnCbnSelchangeCombo1();
 };
