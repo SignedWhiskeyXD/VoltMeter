@@ -6,6 +6,8 @@
 #include <vector>
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortInfo.h>
+#include "VoltMeterSession.h"
+#include <memory>
 using namespace itas109;
 
 // CVoltMeterDlg 对话框
@@ -41,6 +43,12 @@ public:
 private:
 	std::vector<SerialPortInfo> availableDevices;
 	CSerialPort meterPort;
+	std::unique_ptr<VoltMeterSession> pMeterSession;
+	int curSelDev = -1;
+	
 public:
 	afx_msg void OnCbnSelchangeCombo1();
+	CEdit EditBoxMsg;
+	afx_msg void OnBnClickedButton4();
+	uint16_t rawValue = 0;
 };

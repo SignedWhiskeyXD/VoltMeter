@@ -61,6 +61,7 @@ void CVoltMeterDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, ComboDevice);
 	DDX_Control(pDX, IDC_LIST1, ListVoltData);
+	DDX_Control(pDX, IDC_EDIT4, EditBoxMsg);
 }
 
 BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
@@ -68,6 +69,7 @@ BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_CBN_SELCHANGE(IDC_COMBO1, &CVoltMeterDlg::OnCbnSelchangeCombo1)
+	ON_BN_CLICKED(IDC_BUTTON4, &CVoltMeterDlg::OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 
@@ -176,10 +178,16 @@ HCURSOR CVoltMeterDlg::OnQueryDragIcon()
 void CVoltMeterDlg::OnCbnSelchangeCombo1()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	int deviceID = ComboDevice.GetCurSel();
-	if (deviceID >= 0 && deviceID < availableDevices.size()) {
+	curSelDev = ComboDevice.GetCurSel();
+}
+
+
+void CVoltMeterDlg::OnBnClickedButton4()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (curSelDev >= 0 && curSelDev < availableDevices.size()) {
 		meterPort.init(
-			availableDevices[deviceID].portName,
+			availableDevices[curSelDev].portName,
 			BaudRate9600, // baudrate
 			ParityNone,   // parity
 			DataBits8,    // data bit
@@ -187,6 +195,16 @@ void CVoltMeterDlg::OnCbnSelchangeCombo1()
 			FlowNone,     // flow
 			4096
 		);
-		
+		meterPort.setReadIntervalTimeout(0);
+		meterPort.open();
+
+		meterPort.disconnectReadEvent();
+		pMeterSession = std::make_unique<VoltMeterSession>(VoltMeterSession(&meterPort));
+		meterPort.connectReadEvent(pMeterSession.get());
+
+		EditBoxMsg.SetWindowTextW(L"已成功连接至设备!");
+	}
+	else {
+		EditBoxMsg.SetWindowTextW(L"连接失败!");
 	}
 }

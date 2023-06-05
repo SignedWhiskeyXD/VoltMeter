@@ -189,6 +189,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="VoltMeter.h" />
     <ClInclude Include="VoltMeterDlg.h" />
+    <ClInclude Include="VoltMeterSession.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -199,6 +200,7 @@
     </ClCompile>
     <ClCompile Include="VoltMeter.cpp" />
     <ClCompile Include="VoltMeterDlg.cpp" />
+    <ClCompile Include="VoltMeterSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VoltMeter.rc" />
