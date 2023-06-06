@@ -18,7 +18,7 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
             rawValue = tempVal;
         }
         // µ¥Æ¬»ú¶Ï¿ª
-        else {
+        else if(recLen == 1){
             meterMode = 4;
             rawValue = 0;
         }

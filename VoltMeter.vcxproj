@@ -76,6 +76,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>./include;$(IncludePath)</IncludePath>
+    <SourcePath>./src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -184,27 +186,27 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="VoltMeter.h" />
-    <ClInclude Include="VoltMeterDlg.h" />
-    <ClInclude Include="VoltMeterSession.h" />
+    <ClInclude Include="include\framework.h" />
+    <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\Resource.h" />
+    <ClInclude Include="include\targetver.h" />
+    <ClInclude Include="include\VoltMeter.h" />
+    <ClInclude Include="include\VoltMeterDlg.h" />
+    <ClInclude Include="include\VoltMeterSession.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="VoltMeter.cpp" />
-    <ClCompile Include="VoltMeterDlg.cpp" />
-    <ClCompile Include="VoltMeterSession.cpp" />
+    <ClCompile Include="src\VoltMeter.cpp" />
+    <ClCompile Include="src\VoltMeterDlg.cpp" />
+    <ClCompile Include="src\VoltMeterSession.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="VoltMeter.rc" />
+    <ResourceCompile Include="src\VoltMeter.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\VoltMeter.rc2" />

@@ -15,44 +15,44 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VoltMeter.h">
+    <ClInclude Include="include\VoltMeter.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="VoltMeterDlg.h">
+    <ClInclude Include="include\VoltMeterDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="framework.h">
+    <ClInclude Include="include\framework.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
+    <ClInclude Include="include\targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="include\Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="include\pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="VoltMeterSession.h">
+    <ClInclude Include="include\VoltMeterSession.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="VoltMeter.cpp">
+    <ClCompile Include="src\VoltMeter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="VoltMeterDlg.cpp">
+    <ClCompile Include="src\VoltMeterDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="src\pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="VoltMeterSession.cpp">
+    <ClCompile Include="src\VoltMeterSession.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="VoltMeter.rc">
+    <ResourceCompile Include="src\VoltMeter.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
