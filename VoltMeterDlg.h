@@ -10,6 +10,8 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <fstream>
+#include <sstream>
 using namespace itas109;
 
 // CVoltMeterDlg 对话框
@@ -43,9 +45,12 @@ public:
 	CListCtrl ListVoltData;
 
 private:
+	void InsertList();
+	void LoadVoltData();
 	void UpdateVoltVal();
 	bool isFreeze = false;
 	
+	std::fstream fs;
 	std::vector<SerialPortInfo> availableDevices;
 	CSerialPort meterPort;
 	std::unique_ptr<VoltMeterSession> pMeterSession;
@@ -53,6 +58,7 @@ private:
 
 	int meterMode = 4;
 	uint16_t rawValue = 0;
+	double convertVal = 0;
 	
 public:
 	afx_msg void OnCbnSelchangeCombo1();
@@ -62,4 +68,6 @@ public:
 	afx_msg void OnCbnDropdownCombo1();
 	CEdit EditBoxVolt;
 	afx_msg void OnBnClickedButton5();
+	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
 };

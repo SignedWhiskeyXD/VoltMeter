@@ -74,6 +74,8 @@ BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON4, &CVoltMeterDlg::OnBnClickedButton4)
 	ON_CBN_DROPDOWN(IDC_COMBO1, &CVoltMeterDlg::OnCbnDropdownCombo1)
 	ON_BN_CLICKED(IDC_BUTTON5, &CVoltMeterDlg::OnBnClickedButton5)
+	ON_BN_CLICKED(IDC_BUTTON1, &CVoltMeterDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CVoltMeterDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -112,11 +114,10 @@ BOOL CVoltMeterDlg::OnInitDialog()
 	ComboDevice.SetWindowTextW(L"请选择串口设备");
 
 	ListVoltData.SetExtendedStyle(ListVoltData.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
-	ListVoltData.InsertColumn(0, L"记录时间", LVCFMT_LEFT, 120);
-	ListVoltData.InsertColumn(1, L"测量值", LVCFMT_LEFT, 120);
-	ListVoltData.InsertColumn(2, L"设备名", LVCFMT_LEFT, 120);
-
-	
+	ListVoltData.InsertColumn(0, L"序号", LVCFMT_LEFT, 60);
+	ListVoltData.InsertColumn(1, L"测量值", LVCFMT_LEFT, 150);
+	ListVoltData.InsertColumn(2, L"设备名", LVCFMT_LEFT, 115);
+	LoadVoltData();
 
 	std::thread threadProgBar(&CVoltMeterDlg::UpdateVoltVal, this);
 	threadProgBar.detach();
@@ -173,9 +174,26 @@ HCURSOR CVoltMeterDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CVoltMeterDlg::LoadVoltData()
+{
+	ListVoltData.DeleteAllItems();
+	fs.open("log.txt", std::ios::in);
+	std::string line;
+	int i = 0;
+	while (std::getline(fs, line)) {
+		std::stringstream ss(line);
+		std::string id, val, device;
+		ss >> id >> val >> device;
+		ListVoltData.InsertItem(i, CString(id.c_str()));
+		ListVoltData.SetItemText(i, 1, CString(val.c_str()));
+		ListVoltData.SetItemText(i++, 2, CString(device.c_str()));
+	}
+	fs.close();
+}
+
 void CVoltMeterDlg::UpdateVoltVal()
 {
-	static double rangeTab[5] = {0.0, 156.25, 625.0, 2500.0, 5000.0};
+	const static double rangeTab[5] = {39.0625, 156.25, 625.0, 2500.0, 5000.0};
 
 	while(true){
 		if (pMeterSession) {
@@ -183,7 +201,7 @@ void CVoltMeterDlg::UpdateVoltVal()
 			rawValue = pMeterSession->getRawValue();
 		}
 
-		double convertVal = rangeTab[meterMode] * rawValue / 65535;
+		convertVal = rangeTab[meterMode] * rawValue / 65535;
 		CString voltStr;
 		voltStr.Format(L"测量值：%.3lfmV 原始值：%d@L%d", convertVal, rawValue, meterMode);
 		ProgBarVolt.SetPos(((double)rawValue / 65535) * 100);
@@ -257,4 +275,40 @@ void CVoltMeterDlg::OnBnClickedButton5()
 	// TODO: 在此添加控件通知处理程序代码
 	isFreeze = true;
 	EditBoxMsg.SetWindowTextW(L"示数已冻结");
+}
+
+
+void CVoltMeterDlg::OnBnClickedButton1()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (curSelDev < 0 || curSelDev >= availableDevices.size()) {
+		EditBoxMsg.SetWindowTextW(L"未连接设备！");
+		return;
+	}
+
+	int id = ListVoltData.GetItemCount() + 1;
+	CString tempStr;
+	tempStr.Format(L"%d", id);
+	ListVoltData.InsertItem(id - 1, tempStr);
+	tempStr.Format(L"%.3lfmV", convertVal);
+	ListVoltData.SetItemText(id - 1, 1, tempStr);
+	ListVoltData.SetItemText(id - 1, 2, CString(availableDevices[curSelDev].portName));
+	
+	fs.open("log.txt", std::ios::out | std::ios::app);
+	std::stringstream ss;
+	ss << id << '\t' << convertVal << "mV\t" << availableDevices[curSelDev].portName;
+	fs << ss.str() << std::endl;
+	fs.close();
+
+	EditBoxMsg.SetWindowTextW(L"已保存测量值");
+}
+
+
+void CVoltMeterDlg::OnBnClickedButton2()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	ListVoltData.DeleteAllItems();
+	fs.open("log.txt", std::ios::out);
+	fs.close();
+	EditBoxMsg.SetWindowTextW(L"已清空记录值");
 }
