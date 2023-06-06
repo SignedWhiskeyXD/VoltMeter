@@ -44,6 +44,7 @@ public:
 
 private:
 	void UpdateVoltVal();
+	bool isFreeze = false;
 	
 	std::vector<SerialPortInfo> availableDevices;
 	CSerialPort meterPort;
@@ -58,4 +59,7 @@ public:
 	CEdit EditBoxMsg;
 	afx_msg void OnBnClickedButton4();
 	CProgressCtrl ProgBarVolt;
+	afx_msg void OnCbnDropdownCombo1();
+	CEdit EditBoxVolt;
+	afx_msg void OnBnClickedButton5();
 };

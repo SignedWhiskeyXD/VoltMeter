@@ -63,6 +63,7 @@ void CVoltMeterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1, ListVoltData);
 	DDX_Control(pDX, IDC_EDIT4, EditBoxMsg);
 	DDX_Control(pDX, IDC_PROGRESS1, ProgBarVolt);
+	DDX_Control(pDX, IDC_EDIT2, EditBoxVolt);
 }
 
 BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
@@ -71,6 +72,8 @@ BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_CBN_SELCHANGE(IDC_COMBO1, &CVoltMeterDlg::OnCbnSelchangeCombo1)
 	ON_BN_CLICKED(IDC_BUTTON4, &CVoltMeterDlg::OnBnClickedButton4)
+	ON_CBN_DROPDOWN(IDC_COMBO1, &CVoltMeterDlg::OnCbnDropdownCombo1)
+	ON_BN_CLICKED(IDC_BUTTON5, &CVoltMeterDlg::OnBnClickedButton5)
 END_MESSAGE_MAP()
 
 
@@ -113,13 +116,7 @@ BOOL CVoltMeterDlg::OnInitDialog()
 	ListVoltData.InsertColumn(1, L"测量值", LVCFMT_LEFT, 120);
 	ListVoltData.InsertColumn(2, L"设备名", LVCFMT_LEFT, 120);
 
-	this->availableDevices = CSerialPortInfo::availablePortInfos();
-	for (const auto& dev : availableDevices) {
-		CString deviceInfo(dev.portName);
-		deviceInfo.AppendChar(' ');
-		deviceInfo.Append(CString(dev.description));
-		ComboDevice.AddString(deviceInfo);
-	}
+	
 
 	std::thread threadProgBar(&CVoltMeterDlg::UpdateVoltVal, this);
 	threadProgBar.detach();
@@ -178,13 +175,25 @@ HCURSOR CVoltMeterDlg::OnQueryDragIcon()
 
 void CVoltMeterDlg::UpdateVoltVal()
 {
+	static double rangeTab[5] = {0.0, 156.25, 625.0, 2500.0, 5000.0};
+
 	while(true){
 		if (pMeterSession) {
 			meterMode = pMeterSession->getRange();
 			rawValue = pMeterSession->getRawValue();
 		}
 
+		double convertVal = rangeTab[meterMode] * rawValue / 65535;
+		CString voltStr;
+		voltStr.Format(L"测量值：%.3lfmV 原始值：%d@L%d", convertVal, rawValue, meterMode);
 		ProgBarVolt.SetPos(((double)rawValue / 65535) * 100);
+		EditBoxVolt.SetWindowTextW(voltStr);
+
+		
+		if (isFreeze) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			isFreeze = false;
+		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
@@ -225,4 +234,27 @@ void CVoltMeterDlg::OnBnClickedButton4()
 	else {
 		EditBoxMsg.SetWindowTextW(L"连接失败!");
 	}
+}
+
+
+void CVoltMeterDlg::OnCbnDropdownCombo1()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	EditBoxMsg.SetWindowTextW(L"请选择要连接的设备");
+	this->availableDevices = CSerialPortInfo::availablePortInfos();
+	ComboDevice.ResetContent();
+	for (const auto& dev : availableDevices) {
+		CString deviceInfo(dev.portName);
+		deviceInfo.AppendChar(' ');
+		deviceInfo.Append(CString(dev.description));
+		ComboDevice.AddString(deviceInfo);
+	}
+}
+
+
+void CVoltMeterDlg::OnBnClickedButton5()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	isFreeze = true;
+	EditBoxMsg.SetWindowTextW(L"示数已冻结");
 }
