@@ -27,7 +27,7 @@
 你可以使用以下命令安装库CSerialPort：
 
 ~~~powershell
-vcpkg install CSerialPort
+vcpkg install cserialport
 ~~~
 
 
