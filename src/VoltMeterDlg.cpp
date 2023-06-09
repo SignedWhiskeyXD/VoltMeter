@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CVoltMeterDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON5, &CVoltMeterDlg::OnBnClickedButton5)
 	ON_BN_CLICKED(IDC_BUTTON1, &CVoltMeterDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CVoltMeterDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CVoltMeterDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -324,4 +325,11 @@ void CVoltMeterDlg::OnBnClickedButton2()
 	fs.open("log.txt", std::ios::out);
 	fs.close();
 	EditBoxMsg.SetWindowTextW(L"已清空记录值");
+}
+
+void CVoltMeterDlg::OnBnClickedButton3()
+{
+	// 约定发送字符'0'，令单片机对AD进行0位校准
+	meterPort.writeData("0", 1);
+	EditBoxMsg.SetWindowTextW(L"已下达校准指令");
 }
