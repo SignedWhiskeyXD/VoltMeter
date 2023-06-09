@@ -22,17 +22,21 @@
 
 - MSVC
 - 适用于最新v143生成工具的C++MFC 
-- CSerialPort
+- [CSerialPort](https://github.com/itas109/CSerialPort)
 
 你可以使用以下命令安装库CSerialPort：
 
 ~~~powershell
-vcpkg install CSerialPort
+vcpkg install cserialport
 ~~~
 
 
 
 ## 构建
+使用Git克隆本仓库：
+~~~powershell
+git clone https://github.com/SignedWhiskeyXD/VoltMeter.git
+~~~
 
 Visual Studio：从`VoltMeter.sln`打开工程
 
