@@ -40,35 +40,32 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-public:
-	CComboBox ComboDevice;
-	CListCtrl ListVoltData;
 
 private:
-	void InsertList();
+	afx_msg void OnCbnSelchangeCombo1();
+	afx_msg void OnCbnDropdownCombo1();
+	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
+	afx_msg void OnBnClickedButton3();
+	afx_msg void OnBnClickedButton4();
+	afx_msg void OnBnClickedButton5();
 	void LoadVoltData();
 	void UpdateVoltVal();
-	bool isFreeze = false;
 	
 	std::fstream fs;
 	std::vector<SerialPortInfo> availableDevices;
 	CSerialPort meterPort;
 	std::unique_ptr<VoltMeterSession> pMeterSession;
-	int curSelDev = -1;
 
+	bool isFreeze = false;
+	int curSelDev = -1;
 	int meterMode = 4;
 	uint16_t rawValue = 0;
 	double convertVal = 0;
-	
-public:
-	afx_msg void OnCbnSelchangeCombo1();
-	CEdit EditBoxMsg;
-	afx_msg void OnBnClickedButton4();
+
+	CComboBox ComboDevice;
 	CProgressCtrl ProgBarVolt;
-	afx_msg void OnCbnDropdownCombo1();
+	CListCtrl ListVoltData;
 	CEdit EditBoxVolt;
-	afx_msg void OnBnClickedButton5();
-	afx_msg void OnBnClickedButton1();
-	afx_msg void OnBnClickedButton2();
-	afx_msg void OnBnClickedButton3();
+	CEdit EditBoxMsg;
 };

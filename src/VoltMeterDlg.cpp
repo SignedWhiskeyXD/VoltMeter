@@ -217,11 +217,6 @@ void CVoltMeterDlg::UpdateVoltVal()
 		ProgBarVolt.SetPos(((double)rawValue / 65535) * 100);
 		EditBoxVolt.SetWindowTextW(voltStr);
 		
-		// 如果冻结按钮被按下，该线程停止更新1秒，然后恢复
-		if (isFreeze) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-			isFreeze = false;
-		}
 		// 轮询的资源占用率过高，应停止等待
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
@@ -243,12 +238,12 @@ void CVoltMeterDlg::OnBnClickedButton4()
 	if (curSelDev >= 0 && curSelDev < availableDevices.size()) {
 		meterPort.init(		//串口对象初始化
 			availableDevices[curSelDev].portName,
-			BaudRate9600,
-			ParityNone,
-			DataBits8,
-			StopOne,
-			FlowNone, 
-			4096
+			BaudRate9600,	//波特率9600
+			ParityNone,		//无校验位
+			DataBits8,		//8位数据传输
+			StopOne,		//停止位1
+			FlowNone,		//无流控制
+			4096			//缓冲区大小
 		);
 		meterPort.setReadIntervalTimeout(0);
 		meterPort.open();
@@ -278,14 +273,6 @@ void CVoltMeterDlg::OnCbnDropdownCombo1()
 		deviceInfo.Append(CString(dev.description));
 		ComboDevice.AddString(deviceInfo);
 	}
-}
-
-
-void CVoltMeterDlg::OnBnClickedButton5()
-{
-	// 如果冻结按钮被放下，设置示数冻结标志为真
-	isFreeze = true;
-	EditBoxMsg.SetWindowTextW(L"示数已冻结");
 }
 
 
@@ -329,7 +316,14 @@ void CVoltMeterDlg::OnBnClickedButton2()
 
 void CVoltMeterDlg::OnBnClickedButton3()
 {
-	// 约定发送字符'0'，令单片机对AD进行0位校准
+	// 约定发送字符'0'，令单片机对AD进行零偏校准
 	meterPort.writeData("0", 1);
-	EditBoxMsg.SetWindowTextW(L"已下达校准指令");
+	EditBoxMsg.SetWindowTextW(L"已下达零偏校准指令");
+}
+
+void CVoltMeterDlg::OnBnClickedButton5()
+{
+	// 约定发送字符'1'，令单片机对AD进行满偏校准
+	meterPort.writeData("1", 1);
+	EditBoxMsg.SetWindowTextW(L"已下达满偏校准指令");
 }
