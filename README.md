@@ -20,11 +20,11 @@
 
 ## 依赖
 
-- MSVC
-- 适用于最新v143生成工具的C++MFC 
+- MSVC (支持ISO C++11)
+- 适用于`你的VS版本`生成工具的C++MFC 
 - [CSerialPort](https://github.com/itas109/CSerialPort)
 
-你可以使用以下命令安装库CSerialPort：
+你可以使用vcpkg安装库CSerialPort：
 
 ~~~powershell
 vcpkg install cserialport
@@ -40,4 +40,13 @@ git clone https://github.com/SignedWhiskeyXD/VoltMeter.git
 
 Visual Studio：从`VoltMeter.sln`打开工程
 
-CMake：待完善，仓库内`CMakeList.txt`暂不可用
+CMake：
+- 通过支持CMake的IDE打开本项目（例如VSCode CLion等），并通过`CMakeLists.txt`对项目进行配置
+- 或者，你可以通过以下命令生成Visual Studio项目：
+~~~powershell
+mkdir build
+cd build
+cmake .. -G "Visual Studio <VS Version>"
+start ./VoltMeter.sln
+~~~
+~~脱裤子放屁了属于是~~

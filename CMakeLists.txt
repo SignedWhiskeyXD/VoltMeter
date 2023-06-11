@@ -1,12 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 
 project(VoltMeter)
 find_package(MFC REQUIRED)
 find_package(CSerialPort REQUIRED)
 
 add_definitions(-D_AFXDLL)
+add_definitions(-DUNICODE)
+add_definitions(-D_UNICODE) # VS项目默认使用Unicode字符集，因此应保持一致
 set(CMAKE_MFC_FLAG 2) # 1 the static MFC library 2 shared MFC library
 
 set(VoltMeter_SRCs src/pch.cpp src/VoltMeterSession.cpp src/VoltMeter.rc src/VoltMeterDlg.cpp src/VoltMeter.cpp)
