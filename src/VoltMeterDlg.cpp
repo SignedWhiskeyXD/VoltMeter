@@ -112,13 +112,13 @@ BOOL CVoltMeterDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	ComboDevice.SetWindowTextW(L"请选择串口设备");
+	ComboDevice.SetWindowTextA(_T("请选择串口设备"));
 
 	// 初始化列表字段，并从文件加载数据
 	ListVoltData.SetExtendedStyle(ListVoltData.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
-	ListVoltData.InsertColumn(0, L"序号", LVCFMT_LEFT, 60);
-	ListVoltData.InsertColumn(1, L"测量值", LVCFMT_LEFT, 150);
-	ListVoltData.InsertColumn(2, L"设备名", LVCFMT_LEFT, 115);
+	ListVoltData.InsertColumn(0, _T("序号"), LVCFMT_LEFT, 60);
+	ListVoltData.InsertColumn(1, _T("测量值"), LVCFMT_LEFT, 150);
+	ListVoltData.InsertColumn(2, _T("设备名"), LVCFMT_LEFT, 115);
 	LoadVoltData();
 
 	// 更新读数的方法放进单独的线程，与前台分离
@@ -213,9 +213,9 @@ void CVoltMeterDlg::UpdateVoltVal()
 		// 根据量程和挡位计算测量值，并显示在界面上
 		convertVal = rangeTab[meterMode] * rawValue / 65535;
 		CString voltStr;
-		voltStr.Format(L"> %.3lfmV\t%05d@L%d", convertVal, rawValue, meterMode);
+		voltStr.Format(_T("> %.3lfmV\t%05d@L%d"), convertVal, rawValue, meterMode);
 		ProgBarVolt.SetPos(((double)rawValue / 65535) * 100);
-		EditBoxVolt.SetWindowTextW(voltStr);
+		EditBoxVolt.SetWindowTextA(voltStr);
 		
 		// 轮询的资源占用率过高，应停止等待
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -228,7 +228,7 @@ void CVoltMeterDlg::OnCbnSelchangeCombo1()
 {
 	// 当组合框内选择的对象改变时，调用此方法，更新目前选择的对象序号
 	curSelDev = ComboDevice.GetCurSel();
-	EditBoxMsg.SetWindowTextW(L"已选择设备!");
+	EditBoxMsg.SetWindowTextA(_T("已选择设备!"));
 }
 
 
@@ -253,10 +253,10 @@ void CVoltMeterDlg::OnBnClickedButton4()
 		pMeterSession = std::make_unique<VoltMeterSession>(VoltMeterSession(&meterPort));
 		meterPort.connectReadEvent(pMeterSession.get());
 
-		EditBoxMsg.SetWindowTextW(L"已成功连接至设备!");
+		EditBoxMsg.SetWindowTextA(_T("已成功连接至设备!"));
 	}
 	else {
-		EditBoxMsg.SetWindowTextW(L"连接失败!");
+		EditBoxMsg.SetWindowTextA(_T("连接失败!"));
 	}
 }
 
@@ -264,7 +264,7 @@ void CVoltMeterDlg::OnBnClickedButton4()
 void CVoltMeterDlg::OnCbnDropdownCombo1()
 {
 	// 当设备选择组合框下拉时，调用此方法
-	EditBoxMsg.SetWindowTextW(L"请选择要连接的设备");
+	EditBoxMsg.SetWindowTextA(_T("请选择要连接的设备"));
 	this->availableDevices = CSerialPortInfo::availablePortInfos();	//获取所有可用串口设备信息
 	ComboDevice.ResetContent();
 	for (const auto& dev : availableDevices) {	//将每一可用设备的串口号和设备描述信息
@@ -281,16 +281,16 @@ void CVoltMeterDlg::OnBnClickedButton1()
 	// 当保存按钮被放下时，调用此方法
 	if (curSelDev < 0 || curSelDev >= availableDevices.size()) {
 		// 选择的id值非法，直接退出
-		EditBoxMsg.SetWindowTextW(L"未连接设备！");
+		EditBoxMsg.SetWindowTextA(_T("未连接设备！"));
 		return;
 	}
 
 	// 将当前的测量结果添加至表中
 	int id = ListVoltData.GetItemCount() + 1;
 	CString tempStr;
-	tempStr.Format(L"%d", id);
+	tempStr.Format(_T("%d"), id);
 	ListVoltData.InsertItem(id - 1, tempStr);
-	tempStr.Format(L"%.3lfmV", convertVal);
+	tempStr.Format(_T("%.3lfmV"), convertVal);
 	ListVoltData.SetItemText(id - 1, 1, tempStr);
 	ListVoltData.SetItemText(id - 1, 2, CString(availableDevices[curSelDev].portName));
 	
@@ -301,7 +301,7 @@ void CVoltMeterDlg::OnBnClickedButton1()
 	fs << ss.str() << std::endl;
 	fs.close();
 
-	EditBoxMsg.SetWindowTextW(L"已保存测量值");
+	EditBoxMsg.SetWindowTextA(_T("已保存测量值"));
 }
 
 
@@ -311,19 +311,19 @@ void CVoltMeterDlg::OnBnClickedButton2()
 	ListVoltData.DeleteAllItems();
 	fs.open("log.txt", std::ios::out);
 	fs.close();
-	EditBoxMsg.SetWindowTextW(L"已清空记录值");
+	EditBoxMsg.SetWindowTextA(_T("已清空记录值"));
 }
 
 void CVoltMeterDlg::OnBnClickedButton3()
 {
 	// 约定发送字符'0'，令单片机对AD进行零偏校准
 	meterPort.writeData("0", 1);
-	EditBoxMsg.SetWindowTextW(L"已下达零偏校准指令");
+	EditBoxMsg.SetWindowTextA(_T("已下达零偏校准指令"));
 }
 
 void CVoltMeterDlg::OnBnClickedButton5()
 {
 	// 约定发送字符'1'，令单片机对AD进行满偏校准
 	meterPort.writeData("1", 1);
-	EditBoxMsg.SetWindowTextW(L"已下达满偏校准指令");
+	EditBoxMsg.SetWindowTextA(_T("已下达满偏校准指令"));
 }
