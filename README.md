@@ -26,7 +26,7 @@
 
 你可以使用vcpkg安装库CSerialPort：
 
-~~~powershell
+~~~shell
 vcpkg install cserialport
 ~~~
 
@@ -34,7 +34,7 @@ vcpkg install cserialport
 
 ## 构建
 使用Git克隆本仓库：
-~~~powershell
+~~~shell
 git clone https://github.com/SignedWhiskeyXD/VoltMeter.git
 ~~~
 
@@ -42,11 +42,11 @@ Visual Studio：从`VoltMeter.sln`打开工程
 
 CMake：
 - 通过支持CMake的IDE打开本项目（例如VSCode CLion等），并通过`CMakeLists.txt`对项目进行配置
-- 或者，你可以通过以下命令生成Visual Studio项目：
-~~~powershell
+- 或者，你可以通过以下命令构建：
+~~~shell
 mkdir build
 cd build
 cmake .. -G "Visual Studio <VS Version>"
-start ./VoltMeter.sln
+cmake --build .
 ~~~
-~~脱裤子放屁了属于是~~
+~~其实这样写出来的CMake项目根本没有跨平台可移植性，就当我脱裤子放屁吧~~
