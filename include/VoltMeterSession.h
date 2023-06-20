@@ -4,30 +4,39 @@
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortListener.h>
 #include <string>
+#include <QObject>
+#include "qvoltmeter.h"
 using namespace itas109;
 
+class SessionSignalSender : public QObject{
+    Q_OBJECT
+public:
+    signals:
+    void notifyLCD(double val);
 
-class VoltMeterSession : public CSerialPortListener {
+    //static void notifyLCD(uint16_t rawVal);
+};
+
+class VoltMeterSession : public CSerialPortListener{
 public:
     VoltMeterSession(CSerialPort* sp) :
-        pListenerPort(sp) { }
+        pListenerPort(sp){}
 
     void onReadEvent(const char* portName, unsigned int readBufferLen) override;
 
-    // 获取挡位
-    int getRange() const {
-        return meterMode;
+    void convertAndSend(uint16_t rawValue);
+
+    SessionSignalSender* getSender(){
+        return &sender;
     }
 
-    // 获取AD原始采集值
-    uint16_t getRawValue() const {
-        return rawValue;
-    }
+
 
 private:
     CSerialPort* pListenerPort;
     int meterMode = 4;
     uint16_t rawValue = 0;
+    SessionSignalSender sender;
 };
 
 

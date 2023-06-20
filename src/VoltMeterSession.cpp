@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "VoltMeterSession.h"
 
 
@@ -6,23 +5,33 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
 {
     if (readBufferLen > 0)
     {
-        // ¶ÑÉÏ·ÖÅä½ÓÊÜ»º³åÇø£¬²¢½«´®¿ÚÊı¾İ¶ÁÈë»º³åÇø
+        // å †ä¸Šåˆ†é…æ¥å—ç¼“å†²åŒºï¼Œå¹¶å°†ä¸²å£æ•°æ®è¯»å…¥ç¼“å†²åŒº
         char* data = new char[readBufferLen + 1];
         int recLen = pListenerPort->readData(data, (int)readBufferLen);
 
-        //Ğ£ÑéÊı¾İÖ¡
+        //æ ¡éªŒæ•°æ®å¸§
         if (recLen == 6 && data[0] == 'W' && data[1] == 'S' && data[2] == 'K') {
             meterMode = data[3] - '0';
-            // ´ÓÁ½¸ö×Ö½Ú»Ö¸´Îª16Î»ÎŞ·ûºÅÕûÊı
+            // ä»ä¸¤ä¸ªå­—èŠ‚æ¢å¤ä¸º16ä½æ— ç¬¦å·æ•´æ•°
             uint16_t tempVal = ((unsigned char)data[4] << 8) | (unsigned char)data[5];
             rawValue = tempVal;
+            convertAndSend(rawValue);
         }
-        // µ¥Æ¬»ú¶Ï¿ª
+        // å•ç‰‡æœºæ–­å¼€
         else if(recLen == 1){
             meterMode = 4;
             rawValue = 0;
         }
 
-        delete[] data;  //ÊÍ·Å¶ÑÉÏ»º³åÇø
+        delete[] data;  //é‡Šæ”¾å †ä¸Šç¼“å†²åŒº
     }
+}
+
+void VoltMeterSession::convertAndSend(uint16_t rawValue)
+{
+    // ç”µå‹è¡¨äº”ä¸ªæŒ¡ä½çš„é‡ç¨‹ï¼Œå•ä½mV
+    const static double rangeTab[5] = {39.0625, 156.25, 625.0, 2500.0, 5000.0};
+
+    double convertVal = rangeTab[meterMode] * rawValue / 65535;
+    sender.notifyLCD(convertVal);
 }
