@@ -7,23 +7,24 @@
 
 bool SQLHandler::InsertOneRecord(SQLVoltRecord& newRecord) {
     try{
-        session << "INSERT INTO voltMeterRecord (tag, recordTime, value) VALUES(?, ?, ?)",
+        session << "INSERT INTO sensorRecord (tag, recordTime, value, temp) VALUES(?, ?, ?, ?)",
                 use(newRecord.tag),
                 use(newRecord.recordTime),
                 use(newRecord.value),
+                use(newRecord.temp),
                 now;
     }catch (const Poco::Exception& exception){
         spdlog::error("{}: {}", exception.name(), exception.what());
         return false;
     }
-    spdlog::info("Inserted into database: {}mG", newRecord.value);
+    spdlog::info("Inserted into database: {}mG, {}℃", newRecord.value, newRecord.temp);
     return true;
 }
 
 std::vector<std::string> SQLHandler::SelectTags() {
     std::vector<std::string> ret;
     try{
-        session << "SELECT DISTINCT tag FROM voltMeterRecord",
+        session << "SELECT DISTINCT tag FROM sensorRecord",
                 into(ret),
                 now;
     }catch (const Poco::Exception& exception){
@@ -36,7 +37,7 @@ std::vector<std::string> SQLHandler::SelectTags() {
 std::vector<SQLVoltRecord> SQLHandler::SelectRecordByTag(std::string tag) {
     std::vector<SQLVoltRecord> ret;
     try{
-        session << "SELECT * FROM voltMeterRecord WHERE tag = ?",
+        session << "SELECT * FROM sensorRecord WHERE tag = ?",
                 use(tag),
                 into(ret),
                 now;
@@ -49,7 +50,7 @@ std::vector<SQLVoltRecord> SQLHandler::SelectRecordByTag(std::string tag) {
 
 bool SQLHandler::RemoveRecordByTag(std::string tag) {
     try{
-        session << "DELETE FROM voltMeterRecord WHERE tag = ?",
+        session << "DELETE FROM sensorRecord WHERE tag = ?",
                 use(tag),
                 now;
     }catch (const Poco::Exception& exception){

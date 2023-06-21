@@ -48,7 +48,7 @@ public:
 
 private slots:
 
-    void setLCDValue(double val);
+    void setLCDValue(double accVal, double tempVal);
 
     void on_btnScan_clicked();
 
@@ -70,7 +70,7 @@ private slots:
 
     void on_btnSQLDelete_clicked();
 
-    void addPointToChart(double val);
+    void addPointToChart(double accVal, double tempVal);
 
     void on_comboBox_activated(int index);
 

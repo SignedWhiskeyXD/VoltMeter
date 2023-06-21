@@ -12,16 +12,13 @@ using namespace itas109;
 class SessionSignalHandler : public QObject{
     Q_OBJECT
 public:
-    bool isEnableMistakeCtrl() const{
-        return enableMistakeCtrl;
-    };
 
     double getCaliberation() const {
         return this->caliberarion;
     }
 
 signals:
-    void notifyLCD(double val);
+    void notifyLCD(double accVal, double tempVal);
 
 public slots:
     void setMaxRange(int newMaxRange){
@@ -32,29 +29,16 @@ public slots:
         this->caliberarion = newVal + caliberarion;
     }
 
-    void setEnableMistakeCtrl(int newState){
-        enableMistakeCtrl = newState;
-        spdlog::warn("Mistake Control {}!",
-                     enableMistakeCtrl ? "Enabled" : "Disabled");
-    }
-
 private:
     double caliberarion = 1000;
 
     int maxRange = 2000;
-
-    bool enableMistakeCtrl = false;
 };
 
 class VoltMeterSession : public CSerialPortListener{
 public:
     explicit VoltMeterSession(CSerialPort* sp) :
         pListenerPort(sp){}
-
-    enum {
-        BUFFER_SIZE = 20,
-        REALLOC_BUFFER_SIZE = 5
-    };
 
     void onReadEvent(const char* portName, unsigned int readBufferLen) override;
 

@@ -11,14 +11,15 @@ using namespace Poco::Data::Keywords;
 
 class SQLHandler{
 public:
-    SQLHandler(): session(Poco::Data::Session("SQLite", "voltdata.db3"))
+    SQLHandler(): session(Poco::Data::Session("SQLite", "sensorData.db3"))
     {
-        //session << "DROP TABLE IF EXISTS voltMeterRecord", now;
-        session << "CREATE TABLE IF NOT EXISTS voltMeterRecord"
+        // session << "DROP TABLE IF EXISTS sensorRecord", now;
+        session << "CREATE TABLE IF NOT EXISTS sensorRecord"
                    "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
                    "tag VARCHAR, "
                    "recordTime TIME, "
-                   "value DOUBLE)", now;
+                   "value DOUBLE, "
+                   "temp DOUBLE)", now;
     }
 
     SQLHandler(const SQLHandler& rhs) = delete;

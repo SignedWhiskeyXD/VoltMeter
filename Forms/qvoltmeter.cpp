@@ -66,11 +66,15 @@ void QVoltMeter::initChart() noexcept {
     ui->voltChartView->setChart(voltChart);
 }
 
-void QVoltMeter::setLCDValue(double val)
+void QVoltMeter::setLCDValue(double accVal, double tempVal)
 {
-    static char valStr[10];
-    std::snprintf(valStr,10, "%.3lf", val);
-    ui->lcdNumber->display(valStr);
+    static char ValStr[10];
+
+    std::snprintf(ValStr,10, "%.3lf", accVal);
+    ui->lcdNumber->display(ValStr);
+
+    std::snprintf(ValStr,10, "%.2lf", tempVal);
+    ui->lcdTemp->display(ValStr);
 }
 
 void QVoltMeter::on_btnScan_clicked()
@@ -135,9 +139,10 @@ void QVoltMeter::on_btnPortClose_clicked() {
     if(canUpdateChart)
         on_btnCtrlChart_clicked();
     ui->lcdNumber->display(0);
+    ui->lcdTemp->display(0);
 }
 
-void QVoltMeter::addPointToChart(double val) {
+void QVoltMeter::addPointToChart(double accVal, double tempVal) {
     if(!canUpdateChart) return;
 
     if(series.count() > timeAxis->max() - timeAxis->min()) {
@@ -177,19 +182,16 @@ void QVoltMeter::on_comboBox_activated(int index)
 
     pMeterSession = new VoltMeterSession(pMeterPort);
 
-    QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double)),
-                     this, SLOT(setLCDValue(double)));
-    QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double)),
-                     this, SLOT(addPointToChart(double)));
+    QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double, double)),
+                     this, SLOT(setLCDValue(double, double)));
+    QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double, double)),
+                     this, SLOT(addPointToChart(double, double)));
     QObject::connect(this, SIGNAL(notifyMaxRange(int)),
                      pMeterSession->getSender(), SLOT(setMaxRange(int)));
-    QObject::connect(this->ui->checkBox, SIGNAL(stateChanged(int)),
-                     pMeterSession->getSender(), SLOT(setEnableMistakeCtrl(int)));
     QObject::connect(this, SIGNAL(notifyCaliberation(double)),
                      pMeterSession->getSender(), SLOT(setCaliberation(double)));
 
     pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
-    pMeterSession->getSender()->setEnableMistakeCtrl(ui->checkBox->checkState());
     pMeterPort->connectReadEvent(pMeterSession);
 
     if(!canUpdateChart)
@@ -205,8 +207,8 @@ void QVoltMeter::on_comboBox_activated(int index)
 
 void QVoltMeter::disconnectPort() noexcept
 {
-    QObject::disconnect(this, SLOT(setLCDValue(double)));
-    QObject::disconnect(this, SLOT(addPointToChart(double)));
+    QObject::disconnect(this, SLOT(setLCDValue(double, double)));
+    QObject::disconnect(this, SLOT(addPointToChart(double, double)));
     if(pMeterSession != nullptr){
         QObject::disconnect(pMeterSession->getSender(), SLOT(setMaxRange(int)));
     }
@@ -271,7 +273,8 @@ void QVoltMeter::on_btnSQLRecordNow_clicked(){
     SQLVoltRecord newRecord(
             ui->editSQLTag->text().toStdString(),
             SQLHandler::getCurrentTime(),
-            ui->lcdNumber->value()
+            ui->lcdNumber->value(),
+            ui->lcdTemp->value()
     );
     sqlHandler.InsertOneRecord(newRecord);
     loadSQLTags();
@@ -284,7 +287,8 @@ void QVoltMeter::taskSQLRecord() {
         SQLVoltRecord newRecord(
                 ui->editSQLTag->text().toStdString(),
                 SQLHandler::getCurrentTime(),
-                ui->lcdNumber->value()
+                ui->lcdNumber->value(),
+                ui->lcdTemp->value()
                 );
         sqlHandler.InsertOneRecord(newRecord);
         std::this_thread::sleep_for(std::chrono::seconds (ui->spinBoxWait->value()));
@@ -327,15 +331,17 @@ void QVoltMeter::UpdateSQLTable() {
     delete pTableModel;
     pTableModel = new QStandardItemModel;
     pTableModel->setRowCount((int)queryResults.size());
-    pTableModel->setColumnCount(2);
+    pTableModel->setColumnCount(3);
     pTableModel->setHeaderData(0, Qt::Horizontal, "记录时间");
-    pTableModel->setHeaderData(1, Qt::Horizontal, "测量值");
+    pTableModel->setHeaderData(1, Qt::Horizontal, "瞬时加速度(mG)");
+    pTableModel->setHeaderData(2, Qt::Horizontal, "温度(℃)");
 
     for(int i = 0; i < queryResults.size(); ++i){
         pTableModel->setData(pTableModel->index(i, 0),
                              Poco::DateTimeFormatter::format(
                                      queryResults[i].recordTime, "%Y-%m-%d %H:%M:%S").c_str());
         pTableModel->setData(pTableModel->index(i, 1), queryResults[i].value);
+        pTableModel->setData(pTableModel->index(i, 2), queryResults[i].temp);
     }
 
     ui->SQLtableView->setModel(pTableModel);

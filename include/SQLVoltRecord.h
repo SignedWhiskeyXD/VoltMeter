@@ -13,15 +13,16 @@
 
 struct SQLVoltRecord{
     SQLVoltRecord():
-        id(0), value(0.0) {}
+        id(0), value(0.0), temp(0.0) {}
 
-    SQLVoltRecord(std::string tagStr, const Poco::DateTime& time, double val):
-        id(0), tag(std::move(tagStr)), recordTime(time), value(val) {}
+    SQLVoltRecord(std::string tagStr, const Poco::DateTime& time, double val, double tempVal):
+        id(0), tag(std::move(tagStr)), recordTime(time), value(val), temp(tempVal) {}
 
     int id;
     std::string tag;
     Poco::DateTime recordTime;
     double value;
+    double temp;
 };
 
 namespace Poco::Data{
@@ -31,7 +32,7 @@ namespace Poco::Data{
     public:
         static std::size_t size()
         {
-            return 4;
+            return 5;
         }
 
         static void bind(std::size_t pos, const SQLVoltRecord& voltRecord,
@@ -41,6 +42,7 @@ namespace Poco::Data{
             TypeHandler<std::string>::bind(pos++, voltRecord.tag, pBinder, dir);
             TypeHandler<Poco::DateTime>::bind(pos++, voltRecord.recordTime, pBinder, dir);
             TypeHandler<double>::bind(pos++, voltRecord.value, pBinder, dir);
+            TypeHandler<double>::bind(pos++, voltRecord.temp, pBinder, dir);
         }
 
         static void extract(std::size_t pos, SQLVoltRecord& voltRecord,
@@ -50,6 +52,7 @@ namespace Poco::Data{
             TypeHandler<std::string>::extract(pos++, voltRecord.tag, deflt.tag, pExtr);
             TypeHandler<Poco::DateTime>::extract(pos++, voltRecord.recordTime, deflt.recordTime, pExtr);
             TypeHandler<double>::extract(pos++, voltRecord.value, deflt.value, pExtr);
+            TypeHandler<double>::extract(pos++, voltRecord.temp, deflt.temp, pExtr);
         }
 
         static void prepare(std::size_t pos, const SQLVoltRecord& voltRecord, AbstractPreparator::Ptr pPrep)
@@ -58,6 +61,7 @@ namespace Poco::Data{
             TypeHandler<std::string>::prepare(pos++, voltRecord.tag, pPrep);
             TypeHandler<Poco::DateTime>::prepare(pos++, voltRecord.recordTime, pPrep);
             TypeHandler<double>::prepare(pos++, voltRecord.value, pPrep);
+            TypeHandler<double>::prepare(pos++, voltRecord.temp, pPrep);
         }
     };
 

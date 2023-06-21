@@ -15,10 +15,9 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
             int16_t rawVal = (data[4] << 8) + data[5];
             // spdlog::info("raw val: {}, {:#x}, {:#x}", rawVal, data[4], data[5]);
             uint16_t rawTemp = (data[2] << 8) + data[3];
-            spdlog::info("Temperature: {}", rawTemp / 4.0);
             const double convertVal = rawVal * (1000.0 / 256) - sender.getCaliberation();
 
-            sender.notifyLCD(convertVal);
+            sender.notifyLCD(convertVal, rawTemp / 4.0);
         }
 
         delete[] data;  //释放堆上缓冲区
