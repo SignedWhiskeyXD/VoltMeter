@@ -14,13 +14,7 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
             meterMode = data[3] - '0';
             // 从两个字节恢复为16位无符号整数
             uint16_t tempVal = ((unsigned char)data[4] << 8) | (unsigned char)data[5];
-            rawValue = tempVal;
-            convertAndSend(rawValue);
-        }
-        // 单片机断开
-        else if(recLen == 1){
-            meterMode = 4;
-            rawValue = 0;
+            convertAndSend(tempVal);
         }
 
         delete[] data;  //释放堆上缓冲区

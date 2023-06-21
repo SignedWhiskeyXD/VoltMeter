@@ -2,11 +2,8 @@
 // Created by WhiskeyXD on 2023/6/18.
 //
 
-// You may need to build the project (runYaju Qt uic code generator) to get "ui_QVoltMeter.h" resolved
-
 #include "qvoltmeter.h"
 #include "ui_QVoltMeter.h"
-#include <iostream>
 
 
 QVoltMeter::QVoltMeter(QWidget *parent) :
@@ -18,10 +15,20 @@ QVoltMeter::~QVoltMeter() {
     delete ui;
 }
 
+void QVoltMeter::loadRecord() {
+    std::ifstream ifs("log.txt", std::ios::in);
+    ui->listWidget->clear();
+    std::string record;
+    while(std::getline(ifs, record)){
+        ui->listWidget->addItem(record.c_str());
+    }
+    ifs.close();
+}
+
 void QVoltMeter::setLCDValue(double val)
 {
-    char valStr[10];
-    std::sprintf(valStr, "%.3lf", val);
+    static char valStr[10];
+    std::snprintf(valStr,10, "%.3lf", val);
     ui->lcdNumber->display(valStr);
 }
 
@@ -39,20 +46,34 @@ void QVoltMeter::on_pushButton_clicked()
 
 void QVoltMeter::on_pushButton_2_clicked()
 {
+    if(warnInvalidPort()) return;
     pMeterPort->writeData("0", 1);
 }
 
 void QVoltMeter::on_pushButton_3_clicked()
 {
+    if(warnInvalidPort()) return;
     pMeterPort->writeData("1", 1);
 }
 
 void QVoltMeter::on_pushButton_4_clicked() {
+    if(warnInvalidPort()) return;
+    std::string newRecord = fmt::format("{}\t{}mv\t{}",
+                                 ui->listWidget->count() + 1,
+                                 ui->lcdNumber->value(),
+                                 pMeterPort->getPortName());
+    ui->listWidget->addItem(newRecord.c_str());
 
+    std::ofstream ofs("log.txt", std::ios::out | std::ios::app);
+    ofs << newRecord << std::endl;
+    ofs.flush();
+    ofs.close();
 }
 
 void QVoltMeter::on_pushButton_5_clicked() {
-
+    ui->listWidget->clear();
+    std::ofstream ofs("log.txt", std::ios::out);
+    ofs.close();
 }
 
 void QVoltMeter::on_comboBox_activated(int index)
@@ -85,5 +106,18 @@ void QVoltMeter::on_comboBox_activated(int index)
     QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double)),
                      this, SLOT(setLCDValue(double)));
     pMeterPort->connectReadEvent(pMeterSession);
+}
+
+bool QVoltMeter::warnInvalidPort() const
+{
+    if(pMeterPort == nullptr){
+        QMessageBox::warning(nullptr, "警告", "未选择串口设备！", QMessageBox::Ok);
+        return true;
+    }
+    else if(!pMeterPort->isOpen()){
+        QMessageBox::warning(nullptr, "警告", "未打开此串口！", QMessageBox::Ok);
+        return true;
+    }
+    return false;
 }
 

@@ -6,12 +6,15 @@
 #define QVOLTMETER_QVOLTMETER_H
 
 #include <QWidget>
+#include <QMessageBox>
 #include <vector>
 #include <string>
 #include <random>
 #include <thread>
+#include <fstream>
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortInfo.h>
+#include <fmt/core.h>
 #include "VoltMeterSession.h"
 using namespace itas109;
 
@@ -28,10 +31,7 @@ public:
 
     ~QVoltMeter() override;
 
-
-
-signals:
-    void mySignal();
+    void loadRecord();
 
 private slots:
 
@@ -50,6 +50,7 @@ private slots:
     void on_comboBox_activated(int index);
 
 private:
+    bool warnInvalidPort() const;
 
     Ui::QVoltMeter *ui;
 

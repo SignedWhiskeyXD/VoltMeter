@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     qVoltMeter.setMinimumSize(280, 360);
     qVoltMeter.setMaximumSize(280, 360);
 
+    qVoltMeter.loadRecord();
     qVoltMeter.show();
     return QApplication::exec();
 }

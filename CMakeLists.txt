@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(QVoltMeter)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -12,6 +12,7 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 find_package(CSerialPort REQUIRED)
+find_package(fmt REQUIRED)
 
 add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui include/VoltMeterSession.h src/VoltMeterSession.cpp)
 target_link_libraries(QVoltMeter
@@ -19,6 +20,7 @@ target_link_libraries(QVoltMeter
         Qt::Gui
         Qt::Widgets
         ${CSerialPort_LIBRARY}
+        fmt::fmt
         )
 target_include_directories(QVoltMeter PRIVATE include Forms)
 target_include_directories(QVoltMeter PRIVATE ${CSerialPort_INCLUDE_DIR})

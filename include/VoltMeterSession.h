@@ -14,8 +14,6 @@ class SessionSignalSender : public QObject{
 public:
     signals:
     void notifyLCD(double val);
-
-    void notifyLCD(char* val);
 };
 
 class VoltMeterSession : public CSerialPortListener{
@@ -33,8 +31,7 @@ public:
 
 private:
     CSerialPort* pListenerPort;
-    int meterMode = 4;
-    uint16_t rawValue = 0;
+    int meterMode;
     SessionSignalSender sender;
 };
 
