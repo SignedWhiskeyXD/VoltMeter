@@ -5,6 +5,7 @@
 #include <CSerialPort/SerialPortListener.h>
 #include <string>
 #include <QObject>
+#include <string_view>
 #include "qvoltmeter.h"
 using namespace itas109;
 
@@ -14,7 +15,7 @@ public:
     signals:
     void notifyLCD(double val);
 
-    //static void notifyLCD(uint16_t rawVal);
+    void notifyLCD(char* val);
 };
 
 class VoltMeterSession : public CSerialPortListener{
@@ -24,13 +25,11 @@ public:
 
     void onReadEvent(const char* portName, unsigned int readBufferLen) override;
 
-    void convertAndSend(uint16_t rawValue);
+    void convertAndSend(uint16_t rawVal);
 
     SessionSignalSender* getSender(){
         return &sender;
     }
-
-
 
 private:
     CSerialPort* pListenerPort;

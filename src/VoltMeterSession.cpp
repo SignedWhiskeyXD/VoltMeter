@@ -27,11 +27,12 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
     }
 }
 
-void VoltMeterSession::convertAndSend(uint16_t rawValue)
+void VoltMeterSession::convertAndSend(uint16_t rawVal)
 {
     // 电压表五个挡位的量程，单位mV
     const static double rangeTab[5] = {39.0625, 156.25, 625.0, 2500.0, 5000.0};
 
-    double convertVal = rangeTab[meterMode] * rawValue / 65535;
+    double convertVal = rangeTab[meterMode] * rawVal / 65535;
+
     sender.notifyLCD(convertVal);
 }

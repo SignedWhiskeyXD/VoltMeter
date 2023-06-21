@@ -53,7 +53,7 @@ private:
 
     Ui::QVoltMeter *ui;
 
-    CSerialPort meterPort;
+    CSerialPort* pMeterPort = nullptr;
 
     std::vector<SerialPortInfo> availableDevices;
 };

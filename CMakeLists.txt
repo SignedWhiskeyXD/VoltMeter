@@ -13,7 +13,7 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 find_package(CSerialPort REQUIRED)
 
-add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui include/VoltMeterSession.h src/VoltMeterSession.cpp src/SessionHandler.cpp include/SessionHandler.h)
+add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui include/VoltMeterSession.h src/VoltMeterSession.cpp)
 target_link_libraries(QVoltMeter
         Qt::Core
         Qt::Gui
