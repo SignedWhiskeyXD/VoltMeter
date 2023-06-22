@@ -7,6 +7,10 @@
 
 #include <QWidget>
 #include <QMessageBox>
+#include <QtCharts/QChart>
+#include <QtCharts/QChartView>
+#include <QLineSeries>
+#include <QValueAxis>
 #include <vector>
 #include <string>
 #include <random>
@@ -33,6 +37,9 @@ public:
 
     void initMeter();
 
+    signals:
+    void notifyMaxRange(int newRange);
+
 private slots:
 
     void setLCDValue(double val);
@@ -47,16 +54,34 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    void on_pushButton_6_clicked();
+
+    void on_pushButton_7_clicked();
+
+    void addPointToChart(double val);
+
     void on_comboBox_activated(int index);
 
 private:
+    void  initChart();
+
     bool warnInvalidPort() const;
 
     Ui::QVoltMeter *ui;
 
+    QChart *voltChart;
+
+    QLineSeries series;
+
+    QValueAxis *voltAxis = nullptr;
+
+    QValueAxis *timeAxis = nullptr;
+
     CSerialPort* pMeterPort = nullptr;
 
     std::vector<SerialPortInfo> availableDevices;
+
+    bool canUpdateChart = false;
 };
 
 

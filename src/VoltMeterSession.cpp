@@ -23,7 +23,7 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
 
 void VoltMeterSession::convertAndSend(uint16_t rawVal)
 {
-    double convertVal = sender.getMaxRange() * rawVal / (65535 * boost);
+    double convertVal = (double)sender.getMaxRange() * rawVal / (65535 * boost);
 
     sender.notifyLCD(convertVal);
 }

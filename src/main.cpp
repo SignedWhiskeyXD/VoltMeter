@@ -8,8 +8,8 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     QApplication::setStyle("fusion");
     QVoltMeter qVoltMeter;
-    qVoltMeter.setMinimumSize(280, 360);
-    qVoltMeter.setMaximumSize(280, 360);
+    qVoltMeter.setMinimumSize(640, 360);
+    qVoltMeter.setMaximumSize(640, 360);
 
     qVoltMeter.initMeter();
     qVoltMeter.show();

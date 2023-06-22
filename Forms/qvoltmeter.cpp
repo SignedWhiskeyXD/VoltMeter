@@ -7,7 +7,7 @@
 
 
 QVoltMeter::QVoltMeter(QWidget *parent) :
-        QWidget(parent), ui(new Ui::QVoltMeter) {
+        QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()) {
     ui->setupUi(this);
 }
 
@@ -23,8 +23,33 @@ void QVoltMeter::initMeter() {
         ui->listWidget->addItem(record.c_str());
     }
     ifs.close();
-
     on_pushButton_clicked();
+
+    initChart();
+}
+
+void QVoltMeter::initChart() {
+    voltChart->addSeries(&series);
+    voltChart->legend()->hide();
+
+    voltAxis = new QValueAxis();
+    voltAxis->setMax(5000.0);
+    voltAxis->setMin(0);
+    voltAxis->setTickCount(6);
+    voltAxis->setTickInterval(1000);
+    voltChart->addAxis(voltAxis, Qt::AlignLeft);
+    series.attachAxis(voltAxis);
+
+    timeAxis = new QValueAxis();
+    timeAxis->setMax(100);
+    timeAxis->setMin(0);
+    timeAxis->setTickCount(2);
+    timeAxis->setTickInterval(100);
+    timeAxis->hide();
+    voltChart->addAxis(timeAxis, Qt::AlignBottom);
+    series.attachAxis(timeAxis);
+
+    ui->voltChartView->setChart(voltChart);
 }
 
 void QVoltMeter::setLCDValue(double val)
@@ -78,6 +103,36 @@ void QVoltMeter::on_pushButton_5_clicked() {
     ofs.close();
 }
 
+void QVoltMeter::on_pushButton_6_clicked() {
+    int newRange = ui->spinBox->value();
+    voltAxis->setMax(newRange);
+    notifyMaxRange(newRange);
+}
+
+void QVoltMeter::on_pushButton_7_clicked() {
+    //停止示波器
+    if(canUpdateChart){
+        canUpdateChart = false;
+        series.clear();
+        timeAxis->setRange(0, 100);
+        ui->voltChartView->update();
+        ui->pushButton_7->setText("启用示波");
+    }else{      //启用示波器
+        canUpdateChart = true;
+        ui->pushButton_7->setText("禁用示波");
+    }
+}
+
+void QVoltMeter::addPointToChart(double val) {
+    if(!canUpdateChart) return;
+    series.append(series.count(), val);
+    if(series.count() > timeAxis->max() - timeAxis->min())
+        timeAxis->setRange(timeAxis->min() + 1, timeAxis->max() + 1);
+
+    ui->voltChartView->chart()->update();
+    ui->voltChartView->update();
+}
+
 void QVoltMeter::on_comboBox_activated(int index)
 {
     static VoltMeterSession* pMeterSession = nullptr;
@@ -107,7 +162,9 @@ void QVoltMeter::on_comboBox_activated(int index)
 
     QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double)),
                      this, SLOT(setLCDValue(double)));
-    QObject::connect(this->ui->spinBox, SIGNAL(valueChanged(int)),
+    QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double)),
+                     this, SLOT(addPointToChart(double)));
+    QObject::connect(this, SIGNAL(notifyMaxRange(int)),
                      pMeterSession->getSender(), SLOT(setMaxRange(int)));
     pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
     pMeterPort->connectReadEvent(pMeterSession);

@@ -10,6 +10,7 @@ find_package(Qt6 COMPONENTS
         Core
         Gui
         Widgets
+        Charts
         REQUIRED)
 find_package(CSerialPort REQUIRED)
 find_package(fmt REQUIRED)
@@ -19,15 +20,12 @@ target_link_libraries(QVoltMeter
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        Qt::Charts
         ${CSerialPort_LIBRARY}
         fmt::fmt
         )
 target_include_directories(QVoltMeter PRIVATE include Forms)
 target_include_directories(QVoltMeter PRIVATE ${CSerialPort_INCLUDE_DIR})
-
-add_executable(testCase test/testCase.cpp)
-target_link_libraries(testCase ${CSerialPort_LIBRARY})
-target_include_directories(testCase PRIVATE ${CSerialPort_INCLUDE_DIR})
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(DEBUG_SUFFIX)

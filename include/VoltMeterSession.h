@@ -23,7 +23,6 @@ public:
 public slots:
     void setMaxRange(int newMaxRange){
         maxRange = newMaxRange;
-        std::cout << "new range set" << std::endl;
     };
 private:
     int maxRange = 5000;
