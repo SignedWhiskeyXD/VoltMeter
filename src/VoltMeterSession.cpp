@@ -10,8 +10,8 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
         int recLen = pListenerPort->readData(data, (int)readBufferLen);
 
         //校验数据帧
-        if (recLen == 6 && data[0] == 'W' && data[1] == 'S' && data[2] == 'K') {
-            meterMode = data[3] - '0';
+        if (recLen == 6 && data[0] == 'W' && data[1] == 'S' && data[2] == 'K' && data[3]) {
+            boost = (uint8_t)data[3];
             // 从两个字节恢复为16位无符号整数
             uint16_t tempVal = ((unsigned char)data[4] << 8) | (unsigned char)data[5];
             convertAndSend(tempVal);
@@ -23,10 +23,7 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
 
 void VoltMeterSession::convertAndSend(uint16_t rawVal)
 {
-    // 电压表五个挡位的量程，单位mV
-    const static double rangeTab[5] = {39.0625, 156.25, 625.0, 2500.0, 5000.0};
-
-    double convertVal = rangeTab[meterMode] * rawVal / 65535;
+    double convertVal = sender.getMaxRange() * rawVal / (65535 * boost);
 
     sender.notifyLCD(convertVal);
 }

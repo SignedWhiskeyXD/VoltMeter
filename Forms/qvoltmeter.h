@@ -31,7 +31,7 @@ public:
 
     ~QVoltMeter() override;
 
-    void loadRecord();
+    void initMeter();
 
 private slots:
 

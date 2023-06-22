@@ -25,6 +25,9 @@ target_link_libraries(QVoltMeter
 target_include_directories(QVoltMeter PRIVATE include Forms)
 target_include_directories(QVoltMeter PRIVATE ${CSerialPort_INCLUDE_DIR})
 
+add_executable(testCase test/testCase.cpp)
+target_link_libraries(testCase ${CSerialPort_LIBRARY})
+target_include_directories(testCase PRIVATE ${CSerialPort_INCLUDE_DIR})
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(DEBUG_SUFFIX)

@@ -15,7 +15,7 @@ QVoltMeter::~QVoltMeter() {
     delete ui;
 }
 
-void QVoltMeter::loadRecord() {
+void QVoltMeter::initMeter() {
     std::ifstream ifs("log.txt", std::ios::in);
     ui->listWidget->clear();
     std::string record;
@@ -23,6 +23,8 @@ void QVoltMeter::loadRecord() {
         ui->listWidget->addItem(record.c_str());
     }
     ifs.close();
+
+    on_pushButton_clicked();
 }
 
 void QVoltMeter::setLCDValue(double val)
@@ -105,6 +107,9 @@ void QVoltMeter::on_comboBox_activated(int index)
 
     QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double)),
                      this, SLOT(setLCDValue(double)));
+    QObject::connect(this->ui->spinBox, SIGNAL(valueChanged(int)),
+                     pMeterSession->getSender(), SLOT(setMaxRange(int)));
+    pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
     pMeterPort->connectReadEvent(pMeterSession);
 }
 
