@@ -13,7 +13,7 @@ find_package(Qt6 COMPONENTS
         Charts
         REQUIRED)
 find_package(CSerialPort REQUIRED)
-find_package(fmt REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui include/VoltMeterSession.h src/VoltMeterSession.cpp)
 target_link_libraries(QVoltMeter
@@ -22,7 +22,7 @@ target_link_libraries(QVoltMeter
         Qt::Widgets
         Qt::Charts
         ${CSerialPort_LIBRARY}
-        fmt::fmt
+        spdlog::spdlog
         )
 target_include_directories(QVoltMeter PRIVATE include Forms)
 target_include_directories(QVoltMeter PRIVATE ${CSerialPort_INCLUDE_DIR})

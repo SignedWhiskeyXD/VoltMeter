@@ -17,11 +17,13 @@ def serialize_values(boost, uint16Val):
 portName = "COM15"
 turns = 200
 simulate_val = 30000
+waitTime = 0.02
+ser = serial.Serial(portName, baudrate=9600)
 
 while turns > 0:
-    ser = serial.Serial(portName, baudrate=9600)
     simulate_val += random.randrange(-1000, 1000)
     ser.write(serialize_values(1, simulate_val))
-    ser.close()
-    time.sleep(0.1)
+    time.sleep(waitTime)
     turns -= 1
+
+ser.close()

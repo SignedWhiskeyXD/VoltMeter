@@ -18,7 +18,7 @@
 #include <fstream>
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortInfo.h>
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 #include "VoltMeterSession.h"
 using namespace itas109;
 

@@ -61,6 +61,7 @@ void QVoltMeter::setLCDValue(double val)
 
 void QVoltMeter::on_pushButton_clicked()
 {
+    spdlog::info("Scanning for Serial Devices...");
     availableDevices = CSerialPortInfo::availablePortInfos();
     ui->comboBox->clear();
     for (const auto& dev : availableDevices){
@@ -69,44 +70,52 @@ void QVoltMeter::on_pushButton_clicked()
         deviceInfo.append(dev.description);
         ui->comboBox->addItem(deviceInfo);
     }
+    spdlog::info("Found {} available", availableDevices.size());
 }
 
 void QVoltMeter::on_pushButton_2_clicked()
 {
     if(warnInvalidPort()) return;
     pMeterPort->writeData("0", 1);
+    spdlog::warn("Zero Calibration Instructed!");
 }
 
 void QVoltMeter::on_pushButton_3_clicked()
 {
     if(warnInvalidPort()) return;
     pMeterPort->writeData("1", 1);
+    spdlog::warn("Full Calibration Instructed!");
 }
 
 void QVoltMeter::on_pushButton_4_clicked() {
     if(warnInvalidPort()) return;
-    std::string newRecord = fmt::format("{}\t{}mv\t{}",
-                                 ui->listWidget->count() + 1,
-                                 ui->lcdNumber->value(),
-                                 pMeterPort->getPortName());
-    ui->listWidget->addItem(newRecord.c_str());
+    char newRecord[30];
+    snprintf(newRecord, 30, "%d\t%.3lf\t%s",
+             ui->listWidget->count() + 1,
+             ui->lcdNumber->value(),
+             pMeterPort->getPortName());
+
+    ui->listWidget->addItem(newRecord);
 
     std::ofstream ofs("log.txt", std::ios::out | std::ios::app);
     ofs << newRecord << std::endl;
     ofs.flush();
     ofs.close();
+    spdlog::info("Current Record Saved");
 }
 
 void QVoltMeter::on_pushButton_5_clicked() {
     ui->listWidget->clear();
     std::ofstream ofs("log.txt", std::ios::out);
     ofs.close();
+    spdlog::warn("Removed All Records");
 }
 
 void QVoltMeter::on_pushButton_6_clicked() {
     int newRange = ui->spinBox->value();
     voltAxis->setMax(newRange);
     notifyMaxRange(newRange);
+    spdlog::warn("New Max Range set: {}mV", newRange);
 }
 
 void QVoltMeter::on_pushButton_7_clicked() {
@@ -117,9 +126,11 @@ void QVoltMeter::on_pushButton_7_clicked() {
         timeAxis->setRange(0, 100);
         ui->voltChartView->update();
         ui->pushButton_7->setText("启用示波");
+        spdlog::info("Chart record disabled");
     }else{      //启用示波器
         canUpdateChart = true;
         ui->pushButton_7->setText("禁用示波");
+        spdlog::info("Chart record enabled");
     }
 }
 
@@ -131,6 +142,9 @@ void QVoltMeter::addPointToChart(double val) {
 
     ui->voltChartView->chart()->update();
     ui->voltChartView->update();
+
+    if(series.count() % 100 == 0)
+        spdlog::info("Chart Data count: {}", series.count());
 }
 
 void QVoltMeter::on_comboBox_activated(int index)
@@ -156,7 +170,6 @@ void QVoltMeter::on_comboBox_activated(int index)
             4096
     );
     pMeterPort->setReadIntervalTimeout(0);
-    pMeterPort->open();
 
     pMeterSession = new VoltMeterSession(pMeterPort);
 
@@ -168,15 +181,25 @@ void QVoltMeter::on_comboBox_activated(int index)
                      pMeterSession->getSender(), SLOT(setMaxRange(int)));
     pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
     pMeterPort->connectReadEvent(pMeterSession);
+    while (!pMeterPort->open());
+
+    spdlog::info("{} Port status: {}",
+                 pMeterPort->getPortName(),
+                 pMeterPort->isOpen() ? "Opened" : "Closed");
+    spdlog::info("{} Listener Status: {}",
+                 pMeterPort->getPortName(),
+                 pMeterSession == nullptr ? "Not Ready" : "Standing By");
 }
 
 bool QVoltMeter::warnInvalidPort() const
 {
     if(pMeterPort == nullptr){
+        spdlog::warn("Serial Port NOT initialized");
         QMessageBox::warning(nullptr, "警告", "未选择串口设备！", QMessageBox::Ok);
         return true;
     }
     else if(!pMeterPort->isOpen()){
+        spdlog::warn("Serial Port NOT opened");
         QMessageBox::warning(nullptr, "警告", "未打开此串口！", QMessageBox::Ok);
         return true;
     }
