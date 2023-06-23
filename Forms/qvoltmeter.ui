@@ -23,7 +23,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="btnFullCal">
    <property name="geometry">
     <rect>
      <x>190</x>
@@ -36,7 +36,7 @@
     <string>满偏校准</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="btnZeroCal">
    <property name="geometry">
     <rect>
      <x>100</x>
@@ -49,7 +49,7 @@
     <string>零偏校准</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_4">
+  <widget class="QPushButton" name="btnSaveRecord">
    <property name="geometry">
     <rect>
      <x>50</x>
@@ -62,7 +62,7 @@
     <string>保存</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_5">
+  <widget class="QPushButton" name="btnClearRecord">
    <property name="geometry">
     <rect>
      <x>160</x>
@@ -80,12 +80,12 @@
     <rect>
      <x>10</x>
      <y>11</y>
-     <width>261</width>
+     <width>211</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="btnScan">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -158,7 +158,7 @@
     <string>最大量程(mV)</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_6">
+  <widget class="QPushButton" name="btnChangeRange">
    <property name="geometry">
     <rect>
      <x>450</x>
@@ -171,7 +171,7 @@
     <string>修改</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_7">
+  <widget class="QPushButton" name="btnCtrlChart">
    <property name="geometry">
     <rect>
      <x>550</x>
@@ -200,6 +200,19 @@
    </property>
    <property name="text">
     <string>mV</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnPortClose">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>10</y>
+     <width>41</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>断开</string>
    </property>
   </widget>
  </widget>

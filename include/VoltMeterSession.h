@@ -5,9 +5,6 @@
 #include <CSerialPort/SerialPortListener.h>
 #include <string>
 #include <QObject>
-#include <string_view>
-#include <iostream>
-#include "qvoltmeter.h"
 using namespace itas109;
 
 class SessionSignalSender : public QObject{
@@ -37,14 +34,13 @@ public:
 
     void convertAndSend(uint16_t rawVal);
 
-
     SessionSignalSender* getSender(){
         return &sender;
     }
 
 private:
     CSerialPort* pListenerPort;
-    int boost;
+    int gain = 0;
     SessionSignalSender sender;
 };
 

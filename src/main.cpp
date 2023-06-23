@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QPushButton>
 #include "qvoltmeter.h"
 #include "VoltMeterSession.h"
 
@@ -11,7 +10,6 @@ int main(int argc, char *argv[]) {
     qVoltMeter.setMinimumSize(640, 360);
     qVoltMeter.setMaximumSize(640, 360);
 
-    qVoltMeter.initMeter();
     qVoltMeter.show();
     return QApplication::exec();
 }

@@ -35,8 +35,6 @@ public:
 
     ~QVoltMeter() override;
 
-    void initMeter();
-
     signals:
     void notifyMaxRange(int newRange);
 
@@ -44,26 +42,32 @@ private slots:
 
     void setLCDValue(double val);
 
-    void on_pushButton_clicked();
+    void on_btnScan_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_btnZeroCal_clicked() const;
 
-    void on_pushButton_3_clicked();
+    void on_btnFullCal_clicked() const;
 
-    void on_pushButton_4_clicked();
+    void on_btnSaveRecord_clicked();
 
-    void on_pushButton_5_clicked();
+    void on_btnClearRecord_clicked();
 
-    void on_pushButton_6_clicked();
+    void on_btnChangeRange_clicked();
 
-    void on_pushButton_7_clicked();
+    void on_btnCtrlChart_clicked();
+
+    void on_btnPortClose_clicked();
 
     void addPointToChart(double val);
 
     void on_comboBox_activated(int index);
 
 private:
-    void  initChart();
+    void initMeter() noexcept;
+
+    void initChart() noexcept;
+
+    void disconnectPort() noexcept;
 
     bool warnInvalidPort() const;
 
@@ -77,7 +81,9 @@ private:
 
     QValueAxis *timeAxis = nullptr;
 
-    CSerialPort* pMeterPort = nullptr;
+    CSerialPort *pMeterPort = nullptr;
+
+    VoltMeterSession *pMeterSession = nullptr;
 
     std::vector<SerialPortInfo> availableDevices;
 
