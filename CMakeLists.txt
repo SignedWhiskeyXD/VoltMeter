@@ -12,15 +12,21 @@ find_package(Qt6 COMPONENTS
         Widgets
         Charts
         REQUIRED)
+find_package(Poco COMPONENTS
+        Data
+        DataSQLite
+        REQUIRED)
 find_package(CSerialPort REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui include/VoltMeterSession.h src/VoltMeterSession.cpp)
+add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui include/VoltMeterSession.h src/VoltMeterSession.cpp include/SQLHandler.h src/SQLHandler.cpp include/SQLVoltRecord.h src/SQLVoltRecord.cpp)
 target_link_libraries(QVoltMeter
         Qt::Core
         Qt::Gui
         Qt::Widgets
         Qt::Charts
+        Poco::Data
+        Poco::DataSQLite
         ${CSerialPort_LIBRARY}
         spdlog::spdlog
         )

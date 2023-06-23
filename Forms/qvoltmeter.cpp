@@ -10,7 +10,10 @@ QVoltMeter::QVoltMeter(QWidget *parent) :
         QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()) {
     ui->setupUi(this);
     initMeter();
+    initSQLTags();
     initChart();
+
+    QObject::connect(this, SIGNAL(notifyUpdateSQLTable()), this, SLOT(UpdateSQLTable()));
 }
 
 QVoltMeter::~QVoltMeter() {
@@ -18,14 +21,23 @@ QVoltMeter::~QVoltMeter() {
 }
 
 void QVoltMeter::initMeter() noexcept {
-    std::ifstream ifs("log.txt", std::ios::in);
-    ui->listWidget->clear();
-    std::string record;
-    while(std::getline(ifs, record)){
-        ui->listWidget->addItem(record.c_str());
-    }
-    ifs.close();
+//    std::ifstream ifs("log.txt", std::ios::in);
+//    ui->listWidget->clear();
+//    std::string record;
+//    while(std::getline(ifs, record)){
+//        ui->listWidget->addItem(record.c_str());
+//    }
+//    ifs.close();
     on_btnScan_clicked();
+}
+
+void QVoltMeter::initSQLTags() noexcept {
+    auto tags = sqlHandler.SelectTags();
+    ui->comboSQLTags->clear();
+    for(const auto& tagStr : tags){
+        ui->comboSQLTags->addItem(tagStr.c_str());
+    }
+    spdlog::info("Loaded {} Record Tags From Database", tags.size());
 }
 
 void QVoltMeter::initChart() noexcept {
@@ -86,27 +98,27 @@ void QVoltMeter::on_btnFullCal_clicked() const {
 }
 
 void QVoltMeter::on_btnSaveRecord_clicked() {
-    if(warnInvalidPort()) return;
-    char newRecord[30];
-    snprintf(newRecord, 30, "%d\t%.3lfmV\t%s",
-             ui->listWidget->count() + 1,
-             ui->lcdNumber->value(),
-             pMeterPort->getPortName());
-
-    ui->listWidget->addItem(newRecord);
-
-    std::ofstream ofs("log.txt", std::ios::out | std::ios::app);
-    ofs << newRecord << std::endl;
-    ofs.flush();
-    ofs.close();
-    spdlog::info("Current Record Saved");
+//    if(warnInvalidPort()) return;
+//    char newRecord[30];
+//    snprintf(newRecord, 30, "%d\t%.3lfmV\t%s",
+//             ui->listWidget->count() + 1,
+//             ui->lcdNumber->value(),
+//             pMeterPort->getPortName());
+//
+//    ui->listWidget->addItem(newRecord);
+//
+//    std::ofstream ofs("log.txt", std::ios::out | std::ios::app);
+//    ofs << newRecord << std::endl;
+//    ofs.flush();
+//    ofs.close();
+//    spdlog::info("Current Record Saved");
 }
 
 void QVoltMeter::on_btnClearRecord_clicked() {
-    ui->listWidget->clear();
-    std::ofstream ofs("log.txt", std::ios::out);
-    ofs.close();
-    spdlog::warn("Removed All Records");
+//    ui->listWidget->clear();
+//    std::ofstream ofs("log.txt", std::ios::out);
+//    ofs.close();
+//    spdlog::warn("Removed All Records");
 }
 
 void QVoltMeter::on_btnChangeRange_clicked() {
@@ -230,3 +242,81 @@ bool QVoltMeter::warnInvalidPort() const
     return false;
 }
 
+void QVoltMeter::on_btnSQLRecord_clicked() {
+    if(ui->editSQLTag->text().length() == 0){
+        QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
+        return;
+    }
+    if(warnInvalidPort()) return;
+
+    if(SQLCanRecord){
+        SQLCanRecord = false;
+        if(ui->comboSQLTags->findText(ui->editSQLTag->text()) == 0){
+            ui->comboSQLTags->addItem(ui->editSQLTag->text());
+        }
+        ui->editSQLTag->setReadOnly(false);
+        ui->comboSQLWait->setEditable(true);
+        ui->btnSQLRecord->setText("开始记录");
+    }else{
+        ui->editSQLTag->setReadOnly(true);
+        ui->comboSQLWait->setEditable(false);
+        ui->btnSQLRecord->setText("停止记录");
+
+        SQLCanRecord = true;
+        std::thread threadSQLRecord(&QVoltMeter::taskSQLRecord, this);
+        threadSQLRecord.detach();
+    }
+}
+
+void QVoltMeter::taskSQLRecord() {
+    while(SQLCanRecord){
+        SQLVoltRecord newRecord(
+                ui->editSQLTag->text().toStdString(),
+                SQLHandler::getCurrentTime(),
+                ui->lcdNumber->value()
+                );
+        sqlHandler.InsertOneRecord(newRecord);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    }
+}
+
+void QVoltMeter::on_btnSQLQuery_clicked() {
+    std::thread threadSQLQuery(&QVoltMeter::taskSQLQueryByTag, this);
+    threadSQLQuery.detach();
+}
+
+void QVoltMeter::on_btnSQLDelete_clicked() {
+    sqlHandler.RemoveRecordByTag(ui->comboSQLTags->currentText().toStdString());
+}
+
+void QVoltMeter::taskSQLQueryByTag() {
+    if(ui->comboSQLTags->currentText().length() == 0){
+        QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
+        return;
+    }
+    auto tempResults = sqlHandler.SelectRecordByTag(ui->comboSQLTags->currentText().toStdString());
+    queryResults = std::move(tempResults);
+    spdlog::info("Query by tag compelte, recieve {} rows", queryResults.size());
+
+    notifyUpdateSQLTable();
+}
+
+void QVoltMeter::UpdateSQLTable() {
+    delete pTableModel;
+    pTableModel = new QStandardItemModel;
+    pTableModel->setRowCount((int)queryResults.size());
+    pTableModel->setColumnCount(2);
+    pTableModel->setHeaderData(0, Qt::Horizontal, "记录时间");
+    pTableModel->setHeaderData(1, Qt::Horizontal, "测量值");
+
+    for(int i = 0; i < queryResults.size(); ++i){
+        pTableModel->setData(pTableModel->index(i, 0),
+                             Poco::DateTimeFormatter::format(
+                                     queryResults[i].recordTime, "%Y-%m-%d %H:%M:%S").c_str());
+        pTableModel->setData(pTableModel->index(i, 1), queryResults[i].value);
+    }
+
+    ui->SQLtableView->setModel(pTableModel);
+    ui->SQLtableView->resizeColumnsToContents();
+    ui->SQLtableView->update();
+}

@@ -11,6 +11,8 @@
 #include <QtCharts/QChartView>
 #include <QLineSeries>
 #include <QValueAxis>
+#include <QTableView>
+#include <QStandardItemModel>
 #include <vector>
 #include <string>
 #include <random>
@@ -19,7 +21,9 @@
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortInfo.h>
 #include <spdlog/spdlog.h>
+
 #include "VoltMeterSession.h"
+#include "SQLHandler.h"
 using namespace itas109;
 
 
@@ -37,6 +41,8 @@ public:
 
     signals:
     void notifyMaxRange(int newRange);
+
+    void notifyUpdateSQLTable();
 
 private slots:
 
@@ -58,18 +64,30 @@ private slots:
 
     void on_btnPortClose_clicked();
 
+    void on_btnSQLRecord_clicked();
+
+    void on_btnSQLQuery_clicked();
+
+    void on_btnSQLDelete_clicked();
+
     void addPointToChart(double val);
 
     void on_comboBox_activated(int index);
+
+    void UpdateSQLTable();
 
 private:
     void initMeter() noexcept;
 
     void initChart() noexcept;
 
+    void initSQLTags() noexcept;
+
     void disconnectPort() noexcept;
 
     bool warnInvalidPort() const;
+
+    void taskSQLRecord();
 
     Ui::QVoltMeter *ui;
 
@@ -81,13 +99,23 @@ private:
 
     QValueAxis *timeAxis = nullptr;
 
+    QStandardItemModel *pTableModel = nullptr;
+
     CSerialPort *pMeterPort = nullptr;
 
     VoltMeterSession *pMeterSession = nullptr;
 
     std::vector<SerialPortInfo> availableDevices;
 
+    std::vector<SQLVoltRecord> queryResults;
+
+    SQLHandler sqlHandler;
+
     bool canUpdateChart = false;
+
+    bool SQLCanRecord = false;
+
+    void taskSQLQueryByTag();
 };
 
 
