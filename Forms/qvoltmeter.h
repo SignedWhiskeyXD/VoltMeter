@@ -54,10 +54,6 @@ private slots:
 
     void on_btnFullCal_clicked() const;
 
-    void on_btnSaveRecord_clicked();
-
-    void on_btnClearRecord_clicked();
-
     void on_btnChangeRange_clicked();
 
     void on_btnCtrlChart_clicked();

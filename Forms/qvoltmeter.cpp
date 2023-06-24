@@ -97,30 +97,6 @@ void QVoltMeter::on_btnFullCal_clicked() const {
     spdlog::warn("Full Calibration Instructed!");
 }
 
-void QVoltMeter::on_btnSaveRecord_clicked() {
-//    if(warnInvalidPort()) return;
-//    char newRecord[30];
-//    snprintf(newRecord, 30, "%d\t%.3lfmV\t%s",
-//             ui->listWidget->count() + 1,
-//             ui->lcdNumber->value(),
-//             pMeterPort->getPortName());
-//
-//    ui->listWidget->addItem(newRecord);
-//
-//    std::ofstream ofs("log.txt", std::ios::out | std::ios::app);
-//    ofs << newRecord << std::endl;
-//    ofs.flush();
-//    ofs.close();
-//    spdlog::info("Current Record Saved");
-}
-
-void QVoltMeter::on_btnClearRecord_clicked() {
-//    ui->listWidget->clear();
-//    std::ofstream ofs("log.txt", std::ios::out);
-//    ofs.close();
-//    spdlog::warn("Removed All Records");
-}
-
 void QVoltMeter::on_btnChangeRange_clicked() {
     int newRange = ui->spinBox->value();
     voltAxis->setMax(newRange);
