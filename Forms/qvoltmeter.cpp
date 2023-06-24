@@ -10,7 +10,7 @@ QVoltMeter::QVoltMeter(QWidget *parent) :
         QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()) {
     ui->setupUi(this);
     initMeter();
-    initSQLTags();
+    loadSQLTags();
     initChart();
 
     QObject::connect(this, SIGNAL(notifyUpdateSQLTable()), this, SLOT(UpdateSQLTable()));
@@ -31,7 +31,7 @@ void QVoltMeter::initMeter() noexcept {
     on_btnScan_clicked();
 }
 
-void QVoltMeter::initSQLTags() noexcept {
+void QVoltMeter::loadSQLTags() noexcept {
     auto tags = sqlHandler.SelectTags();
     ui->comboSQLTags->clear();
     for(const auto& tagStr : tags){
@@ -251,15 +251,13 @@ void QVoltMeter::on_btnSQLRecord_clicked() {
 
     if(SQLCanRecord){
         SQLCanRecord = false;
-        if(ui->comboSQLTags->findText(ui->editSQLTag->text()) == 0){
-            ui->comboSQLTags->addItem(ui->editSQLTag->text());
-        }
+        loadSQLTags();
         ui->editSQLTag->setReadOnly(false);
-        ui->comboSQLWait->setEditable(true);
+        ui->spinBoxWait->setReadOnly(false);
         ui->btnSQLRecord->setText("开始记录");
     }else{
         ui->editSQLTag->setReadOnly(true);
-        ui->comboSQLWait->setEditable(false);
+        ui->spinBoxWait->setReadOnly(true);
         ui->btnSQLRecord->setText("停止记录");
 
         SQLCanRecord = true;
@@ -276,17 +274,20 @@ void QVoltMeter::taskSQLRecord() {
                 ui->lcdNumber->value()
                 );
         sqlHandler.InsertOneRecord(newRecord);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::seconds (ui->spinBoxWait->value()));
     }
 }
 
 void QVoltMeter::on_btnSQLQuery_clicked() {
     std::thread threadSQLQuery(&QVoltMeter::taskSQLQueryByTag, this);
     threadSQLQuery.detach();
+    ui->tabWidget->setCurrentIndex(1);
 }
 
 void QVoltMeter::on_btnSQLDelete_clicked() {
     sqlHandler.RemoveRecordByTag(ui->comboSQLTags->currentText().toStdString());
+    ui->tabWidget->setCurrentIndex(0);
+    loadSQLTags();
 }
 
 void QVoltMeter::taskSQLQueryByTag() {

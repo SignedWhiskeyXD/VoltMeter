@@ -81,7 +81,7 @@ private:
 
     void initChart() noexcept;
 
-    void initSQLTags() noexcept;
+    void loadSQLTags() noexcept;
 
     void disconnectPort() noexcept;
 

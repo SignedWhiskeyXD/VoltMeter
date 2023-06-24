@@ -2,6 +2,7 @@ import time
 import serial
 import random
 
+
 def serialize_values(boost, uint16Val):
     # 转换为字节序列
     byte1 = bytes([boost])
@@ -15,14 +16,20 @@ def serialize_values(boost, uint16Val):
 
 
 portName = "COM15"
-turns = 200
+turns = 10000
 simulate_val = 30000
-waitTime = 0.02
+PGAGain = 1
+waitTime = 0.1
 ser = serial.Serial(portName, baudrate=9600)
 
-while turns > 0:
+while turns:
     simulate_val += random.randrange(-1000, 1000)
-    ser.write(serialize_values(1, simulate_val))
+    if simulate_val > 65535:
+        simulate_val = 30000
+    elif simulate_val < 0:
+        simulate_val = 30000
+
+    ser.write(serialize_values(PGAGain, simulate_val))
     time.sleep(waitTime)
     turns -= 1
 

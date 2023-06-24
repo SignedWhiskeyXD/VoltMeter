@@ -16,7 +16,7 @@ bool SQLHandler::InsertOneRecord(SQLVoltRecord& newRecord) {
         spdlog::error("{}: {}", exception.name(), exception.what());
         return false;
     }
-    spdlog::info("Inserted into database");
+    spdlog::info("Inserted into database: {}mV", newRecord.value);
     return true;
 }
 
