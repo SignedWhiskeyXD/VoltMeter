@@ -1,6 +1,8 @@
 注意: 现master分支为Qt实现版本，MFC实现版本已移动至分支`MFC_Ver`
 # VoltMeter：简单的GUI电压采集软件
 
+![](./Preview.png)
+
 8051MCU代码仓库：[VoltMeter_C51](https://github.com/SignedWhiskeyXD/VoltMeter_C51)
 
 ## 简介
@@ -12,9 +14,11 @@
 
 ## 用途
 
-接受来自MCU的采集的电压数据，可视化显示在软件前台，具备仿示波器功能
+接受来自MCU的采集的电压数据，可视化显示在软件前台
 
-向MCU发送指令，执行校准等操作
+具备仿示波器功能，通过SQL对记录数据进行增删查
+
+通过向MCU发送指令，执行校准等操作
 
 兼容任何使用不超过16位AD进行采集的MCU，要求按以下顺序通过串口连续发送6个字节作为数据帧：
 
@@ -37,17 +41,20 @@
 
 ## 依赖
 
-- MSVC (需要支持ISO C++11)
+- ISO C++11
 - Qt 6.2.4
 - [CSerialPort](https://github.com/itas109/CSerialPort)
 - [spdlog](https://github.com/gabime/spdlog)
+- [Poco DataSQLite](https://github.com/pocoproject/poco)
 
-你可以使用vcpkg安装库CSerialPort与spdlog：
+你可以使用[vcpkg](https://github.com/microsoft/vcpkg)安装以上依赖：
 
 ~~~shell
 vcpkg install cserialport spdlog
+vcpkg install poco[core,sqlite3]
 ~~~
 
+本项目于Windows10， VS2022构建，其它平台暂未测试
 
 
 ## 构建
