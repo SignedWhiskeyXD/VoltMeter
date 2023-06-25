@@ -255,22 +255,26 @@ void QVoltMeter::taskSQLRecord() {
 }
 
 void QVoltMeter::on_btnSQLQuery_clicked() {
+    if(ui->comboSQLTags->currentText().length() == 0){
+        QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
+        return;
+    }
     std::thread threadSQLQuery(&QVoltMeter::taskSQLQueryByTag, this);
     threadSQLQuery.detach();
     ui->tabWidget->setCurrentIndex(1);
 }
 
 void QVoltMeter::on_btnSQLDelete_clicked() {
+    if(ui->comboSQLTags->currentText().length() == 0){
+        QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
+        return;
+    }
     sqlHandler.RemoveRecordByTag(ui->comboSQLTags->currentText().toStdString());
     ui->tabWidget->setCurrentIndex(0);
     loadSQLTags();
 }
 
 void QVoltMeter::taskSQLQueryByTag() {
-    if(ui->comboSQLTags->currentText().length() == 0){
-        QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
-        return;
-    }
     auto tempResults = sqlHandler.SelectRecordByTag(ui->comboSQLTags->currentText().toStdString());
     queryResults = std::move(tempResults);
     spdlog::info("Query by tag compelte, recieve {} rows", queryResults.size());
