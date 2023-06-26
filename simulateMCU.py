@@ -1,3 +1,4 @@
+import datetime
 import time
 import serial
 import random
@@ -23,13 +24,21 @@ waitTime = 0.1
 ser = serial.Serial(portName, baudrate=9600)
 
 while turns:
+    oops = False
+    if random.randrange(0, 40) == 0:
+        oops = True
+        print("oops...",  datetime.datetime.now())
+
     simulate_val += random.randrange(-1000, 1000)
     if simulate_val > 65535:
         simulate_val = 30000
     elif simulate_val < 0:
         simulate_val = 30000
 
-    ser.write(serialize_values(PGAGain, simulate_val))
+    if oops:
+        ser.write(serialize_values(PGAGain, simulate_val + 10000))
+    else:
+        ser.write(serialize_values(PGAGain, simulate_val))
     time.sleep(waitTime)
     turns -= 1
 
