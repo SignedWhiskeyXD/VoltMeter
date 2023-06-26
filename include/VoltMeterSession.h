@@ -4,6 +4,7 @@
 #include <CSerialPort/SerialPort.h>
 #include <CSerialPort/SerialPortListener.h>
 #include <string>
+#include <deque>
 #include <QObject>
 using namespace itas109;
 
@@ -27,20 +28,31 @@ private:
 
 class VoltMeterSession : public CSerialPortListener{
 public:
-    VoltMeterSession(CSerialPort* sp) :
+    explicit VoltMeterSession(CSerialPort* sp) :
         pListenerPort(sp){}
 
-    void onReadEvent(const char* portName, unsigned int readBufferLen) override;
+    enum {
+        BUFFER_SIZE = 10
+    };
 
-    void convertAndSend(uint16_t rawVal);
+    void onReadEvent(const char* portName, unsigned int readBufferLen) override;
 
     SessionSignalSender* getSender(){
         return &sender;
     }
 
 private:
+    void processData(uint16_t newVal);
+
+    void convertAndSend(uint16_t rawVal);
+
+    std::deque<uint16_t> rawValBuffer;
+
+    std::deque<uint16_t> subRawValBuffer;
+
     CSerialPort* pListenerPort;
     int gain = 0;
+    uint16_t bufferAVG = 0.0;
     SessionSignalSender sender;
 };
 

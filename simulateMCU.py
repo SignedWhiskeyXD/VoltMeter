@@ -1,3 +1,4 @@
+import datetime
 import time
 import serial
 import random
@@ -29,7 +30,15 @@ while turns:
     elif simulate_val < 0:
         simulate_val = 30000
 
-    ser.write(serialize_values(PGAGain, simulate_val))
+    oops = False
+    if random.randrange(0, 40) == 0:
+        oops = True
+        print("oops...",  datetime.datetime.now())
+
+    if oops:
+        ser.write(serialize_values(PGAGain, simulate_val + 10000))
+    else:
+        ser.write(serialize_values(PGAGain, simulate_val))
     time.sleep(waitTime)
     turns -= 1
 
