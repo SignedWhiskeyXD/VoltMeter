@@ -23,13 +23,13 @@ public:
 
     SQLHandler(const SQLHandler& rhs) = delete;
 
+    SQLHandler& operator=(const SQLHandler& rhs) = delete;
+
     static Poco::DateTime getCurrentTime(int local = 28800){
         Poco::DateTime ret;
         ret.makeLocal(28800);
         return ret;
     }
-
-    SQLHandler& operator=(const SQLHandler& rhs) = delete;
 
     bool InsertOneRecord(SQLVoltRecord& newRecord);
 

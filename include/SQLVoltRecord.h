@@ -9,13 +9,14 @@
 #include <Poco/Data/TypeHandler.h>
 #include <Poco/DateTimeFormatter.h>
 #include <string>
+#include <utility>
 
 struct SQLVoltRecord{
     SQLVoltRecord():
         id(0), value(0.0) {}
 
-    SQLVoltRecord(std::string tagStr, Poco::DateTime time, double val):
-        id(0), tag(tagStr), recordTime(time), value(val) {}
+    SQLVoltRecord(std::string tagStr, const Poco::DateTime& time, double val):
+        id(0), tag(std::move(tagStr)), recordTime(time), value(val) {}
 
     int id;
     std::string tag;
@@ -33,7 +34,8 @@ namespace Poco::Data{
             return 4;
         }
 
-        static void bind(std::size_t pos, const SQLVoltRecord& voltRecord, AbstractBinder::Ptr pBinder, AbstractBinder::Direction dir)
+        static void bind(std::size_t pos, const SQLVoltRecord& voltRecord,
+                         AbstractBinder::Ptr pBinder, AbstractBinder::Direction dir)
         {
             TypeHandler<int>::bind(pos++, voltRecord.id, pBinder, dir);
             TypeHandler<std::string>::bind(pos++, voltRecord.tag, pBinder, dir);
@@ -41,7 +43,8 @@ namespace Poco::Data{
             TypeHandler<double>::bind(pos++, voltRecord.value, pBinder, dir);
         }
 
-        static void extract(std::size_t pos, SQLVoltRecord& voltRecord, const SQLVoltRecord& deflt, AbstractExtractor::Ptr pExtr)
+        static void extract(std::size_t pos, SQLVoltRecord& voltRecord,
+                            const SQLVoltRecord& deflt, AbstractExtractor::Ptr pExtr)
         {
             TypeHandler<int>::extract(pos++, voltRecord.id, deflt.id, pExtr);
             TypeHandler<std::string>::extract(pos++, voltRecord.tag, deflt.tag, pExtr);

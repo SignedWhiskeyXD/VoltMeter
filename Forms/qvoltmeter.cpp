@@ -13,7 +13,8 @@ QVoltMeter::QVoltMeter(QWidget *parent) :
     loadSQLTags();
     initChart();
 
-    QObject::connect(this, SIGNAL(notifyUpdateSQLTable()), this, SLOT(UpdateSQLTable()));
+    QObject::connect(this, SIGNAL(notifyUpdateSQLTable()),
+                     this, SLOT(UpdateSQLTable()));
 }
 
 QVoltMeter::~QVoltMeter() {
@@ -121,7 +122,13 @@ void QVoltMeter::on_btnCtrlChart_clicked() {
 }
 
 void QVoltMeter::on_btnPortClose_clicked() {
+    SQLCanRecord = false;
+    ui->editSQLTag->setReadOnly(false);
+    ui->spinBoxWait->setReadOnly(false);
+    ui->btnSQLRecord->setText("开始记录");
+    loadSQLTags();
     disconnectPort();
+    ui->lcdNumber->display(0);
 }
 
 void QVoltMeter::addPointToChart(double val) {
@@ -227,10 +234,10 @@ void QVoltMeter::on_btnSQLRecord_clicked() {
 
     if(SQLCanRecord){
         SQLCanRecord = false;
-        loadSQLTags();
         ui->editSQLTag->setReadOnly(false);
         ui->spinBoxWait->setReadOnly(false);
         ui->btnSQLRecord->setText("开始记录");
+        loadSQLTags();
     }else{
         ui->editSQLTag->setReadOnly(true);
         ui->spinBoxWait->setReadOnly(true);
@@ -275,8 +282,7 @@ void QVoltMeter::on_btnSQLDelete_clicked() {
 }
 
 void QVoltMeter::taskSQLQueryByTag() {
-    auto tempResults = sqlHandler.SelectRecordByTag(ui->comboSQLTags->currentText().toStdString());
-    queryResults = std::move(tempResults);
+    queryResults = sqlHandler.SelectRecordByTag(ui->comboSQLTags->currentText().toStdString());
     spdlog::info("Query by tag compelte, recieve {} rows", queryResults.size());
 
     notifyUpdateSQLTable();
