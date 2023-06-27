@@ -9,9 +9,16 @@
 QVoltMeter::QVoltMeter(QWidget *parent) :
         QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()) {
     ui->setupUi(this);
-    initMeter();
+    on_btnScan_clicked();
     loadSQLTags();
     initChart();
+
+    if(ui->comboSQLTags->count() != 0)
+        ui->editSQLTag->setText(ui->comboSQLTags->currentText());
+    else {
+        ui->editSQLTag->setPlaceholderText("请输入备注");
+        ui->comboSQLTags->setPlaceholderText("暂无保存记录");
+    }
 
     QObject::connect(this, SIGNAL(notifyUpdateSQLTable()),
                      this, SLOT(UpdateSQLTable()));
@@ -19,17 +26,12 @@ QVoltMeter::QVoltMeter(QWidget *parent) :
 
 QVoltMeter::~QVoltMeter() {
     delete ui;
-}
-
-void QVoltMeter::initMeter() noexcept {
-//    std::ifstream ifs("log.txt", std::ios::in);
-//    ui->listWidget->clear();
-//    std::string record;
-//    while(std::getline(ifs, record)){
-//        ui->listWidget->addItem(record.c_str());
-//    }
-//    ifs.close();
-    on_btnScan_clicked();
+    delete voltChart;
+    delete voltAxis;
+    delete timeAxis;
+    delete pTableModel;
+    delete pMeterPort;
+    delete pMeterSession;
 }
 
 void QVoltMeter::loadSQLTags() noexcept {
@@ -128,25 +130,24 @@ void QVoltMeter::on_btnPortClose_clicked() {
     ui->btnSQLRecord->setText("开始记录");
     loadSQLTags();
     disconnectPort();
+    if(canUpdateChart)
+        on_btnCtrlChart_clicked();
     ui->lcdNumber->display(0);
 }
 
 void QVoltMeter::addPointToChart(double val) {
     if(!canUpdateChart) return;
-    series.append(series.count(), val);
-    if(series.count() > timeAxis->max() - timeAxis->min())
+
+    if(series.count() > timeAxis->max() - timeAxis->min()) {
         timeAxis->setRange(timeAxis->min() + 1, timeAxis->max() + 1);
+        series.append(timeAxis->max(), ui->lcdNumber->value());
+        series.remove(0);
+    }else{
+        series.append(series.count(), ui->lcdNumber->value());
+    }
 
     ui->voltChartView->chart()->update();
     ui->voltChartView->update();
-
-    if(series.count() % 100 == 0)
-        spdlog::info("Chart Data count: {}", series.count());
-    if(series.count() > 10000){
-        series.clear();
-        timeAxis->setRange(0, 100);
-        ui->voltChartView->update();
-    }
 }
 
 void QVoltMeter::on_comboBox_activated(int index)
@@ -249,7 +250,25 @@ void QVoltMeter::on_btnSQLRecord_clicked() {
     }
 }
 
+void QVoltMeter::on_btnSQLRecordNow_clicked(){
+    if(ui->editSQLTag->text().length() == 0){
+        QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
+        return;
+    }
+    if(warnInvalidPort()) return;
+
+    SQLVoltRecord newRecord(
+            ui->editSQLTag->text().toStdString(),
+            SQLHandler::getCurrentTime(),
+            ui->lcdNumber->value()
+    );
+    sqlHandler.InsertOneRecord(newRecord);
+    loadSQLTags();
+}
+
 void QVoltMeter::taskSQLRecord() {
+    bool isSQLTagsUpdated = false;
+
     while(SQLCanRecord){
         SQLVoltRecord newRecord(
                 ui->editSQLTag->text().toStdString(),
@@ -258,6 +277,11 @@ void QVoltMeter::taskSQLRecord() {
                 );
         sqlHandler.InsertOneRecord(newRecord);
         std::this_thread::sleep_for(std::chrono::seconds (ui->spinBoxWait->value()));
+
+        if(!isSQLTagsUpdated){
+            loadSQLTags();
+            isSQLTagsUpdated = true;
+        }
     }
 }
 

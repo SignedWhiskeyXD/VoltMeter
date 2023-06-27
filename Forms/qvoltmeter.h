@@ -62,6 +62,8 @@ private slots:
 
     void on_btnSQLRecord_clicked();
 
+    void on_btnSQLRecordNow_clicked();
+
     void on_btnSQLQuery_clicked();
 
     void on_btnSQLDelete_clicked();
@@ -73,7 +75,6 @@ private slots:
     void UpdateSQLTable();
 
 private:
-    void initMeter() noexcept;
 
     void initChart() noexcept;
 

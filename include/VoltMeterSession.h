@@ -32,7 +32,8 @@ public:
         pListenerPort(sp){}
 
     enum {
-        BUFFER_SIZE = 10
+        BUFFER_SIZE = 20,
+        REALLOC_BUFFER_SIZE = 5
     };
 
     void onReadEvent(const char* portName, unsigned int readBufferLen) override;
@@ -42,17 +43,15 @@ public:
     }
 
 private:
-    void processData(uint16_t newVal);
+    void processData(double newVal);
 
-    void convertAndSend(uint16_t rawVal);
+    std::deque<double> recentValBuffer;
 
-    std::deque<uint16_t> rawValBuffer;
-
-    std::deque<uint16_t> subRawValBuffer;
+    std::deque<double> badValBuffer;
 
     CSerialPort* pListenerPort;
     int gain = 0;
-    uint16_t bufferAVG = 0.0;
+    double bufferAVG = 0.0;
     SessionSignalSender sender;
 };
 
