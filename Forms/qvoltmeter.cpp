@@ -181,8 +181,15 @@ void QVoltMeter::on_comboBox_activated(int index)
                      this, SLOT(addPointToChart(double)));
     QObject::connect(this, SIGNAL(notifyMaxRange(int)),
                      pMeterSession->getSender(), SLOT(setMaxRange(int)));
+    QObject::connect(this->ui->checkBox, SIGNAL(stateChanged(int)),
+                     pMeterSession->getSender(), SLOT(setEnableMistakeCtrl(int)));
+
     pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
+    pMeterSession->getSender()->setEnableMistakeCtrl(ui->checkBox->checkState());
     pMeterPort->connectReadEvent(pMeterSession);
+
+    if(!canUpdateChart)
+        on_btnCtrlChart_clicked();
 
     spdlog::info("{} Port status: {}",
                  pMeterPort->getPortName(),
