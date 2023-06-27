@@ -6,24 +6,37 @@
 #include <string>
 #include <deque>
 #include <QObject>
+#include <spdlog/spdlog.h>
 using namespace itas109;
 
 class SessionSignalSender : public QObject{
     Q_OBJECT
 public:
-    int getMaxRange(){
+    int getMaxRange() const{
         return maxRange;
     }
 
-    signals:
+    bool isEnableMistakeCtrl() const{
+        return enableMistakeCtrl;
+    };
+
+signals:
     void notifyLCD(double val);
 
 public slots:
     void setMaxRange(int newMaxRange){
         maxRange = newMaxRange;
     };
+
+    void setEnableMistakeCtrl(int newState){
+        enableMistakeCtrl = newState;
+        spdlog::warn("Mistake Control {}!",
+                     enableMistakeCtrl ? "Enabled" : "Disabled");
+    }
+
 private:
     int maxRange = 5000;
+    bool enableMistakeCtrl = false;
 };
 
 class VoltMeterSession : public CSerialPortListener{
@@ -51,7 +64,7 @@ private:
 
     CSerialPort* pListenerPort;
     int gain = 0;
-    double bufferAVG = 0.0;
+    double recentBufferSum = 0.0;
     SessionSignalSender sender;
 };
 

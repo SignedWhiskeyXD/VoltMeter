@@ -92,9 +92,9 @@ private:
 
     QLineSeries series;
 
-    QValueAxis *voltAxis = nullptr;
+    QValueAxis *voltAxis;
 
-    QValueAxis *timeAxis = nullptr;
+    QValueAxis *timeAxis;
 
     QStandardItemModel *pTableModel = nullptr;
 

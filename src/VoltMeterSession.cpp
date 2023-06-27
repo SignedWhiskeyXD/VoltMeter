@@ -18,7 +18,15 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
             // 从两个字节恢复为16位无符号整数
             uint16_t rawVal = ((unsigned char)data[4] << 8) | (unsigned char)data[5];
             double convertVal = (double)sender.getMaxRange() * rawVal / (65535 * gain);
-            processData(convertVal);
+
+            if(sender.isEnableMistakeCtrl())
+                processData(convertVal);
+            else{
+                recentValBuffer.clear();
+                badValBuffer.clear();
+                recentBufferSum = 0.0;
+                sender.notifyLCD(convertVal);
+            }
         }
 
         delete[] data;  //释放堆上缓冲区
@@ -27,26 +35,35 @@ void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBuffer
 
 void VoltMeterSession::processData(double newVal) {
     if(recentValBuffer.empty()){
-        sender.notifyLCD(newVal);
         recentValBuffer.push_back(newVal);
+        recentBufferSum = newVal;
+        sender.notifyLCD(newVal);
         return;
     }
 
-    bufferAVG = std::accumulate(recentValBuffer.cbegin(), recentValBuffer.cend(), 0.0) / recentValBuffer.size();
-    bool flag = abs(newVal - bufferAVG) < bufferAVG * 0.2;
+    double bufferAVG = recentBufferSum / (double)recentValBuffer.size();
+    bool isGoodValue = abs(newVal - bufferAVG) < bufferAVG * 0.2;
 
-    if(flag){
+    if(isGoodValue){
         recentValBuffer.push_back(newVal);
-        badValBuffer.clear();
-        if(recentValBuffer.size() > BUFFER_SIZE) recentValBuffer.pop_front();
-    }else if(badValBuffer.size() < REALLOC_BUFFER_SIZE - 1){
+        recentBufferSum += newVal;
+        if(!badValBuffer.empty()) {
+            spdlog::warn("Caught {} bad {}!", badValBuffer.size(),
+                         badValBuffer.size() > 1 ? "values" : "value");
+            badValBuffer.clear();
+        }
+        if(recentValBuffer.size() > BUFFER_SIZE) {
+            recentBufferSum -= recentValBuffer.front();
+            recentValBuffer.pop_front();
+        }
+    }else if(badValBuffer.size() < REALLOC_BUFFER_SIZE){
         badValBuffer.push_back(newVal);
-        spdlog::warn("Data NOT Good!");
     }else{
         recentValBuffer = std::move(badValBuffer);
         recentValBuffer.push_back(newVal);
+        recentBufferSum = std::accumulate(recentValBuffer.cbegin(), recentValBuffer.cend(), 0.0);
         badValBuffer.clear();
-        spdlog::warn("Buffer reallocated! ");
+        spdlog::warn("Bad value buffer reallocated!");
     }
 
     if(recentValBuffer.empty())

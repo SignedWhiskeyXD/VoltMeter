@@ -7,7 +7,8 @@
 
 
 QVoltMeter::QVoltMeter(QWidget *parent) :
-        QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()) {
+        QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()),
+        voltAxis(new QValueAxis()), timeAxis(new QValueAxis()) {
     ui->setupUi(this);
     on_btnScan_clicked();
     loadSQLTags();
@@ -47,7 +48,6 @@ void QVoltMeter::initChart() noexcept {
     voltChart->addSeries(&series);
     voltChart->legend()->hide();
 
-    voltAxis = new QValueAxis();
     voltAxis->setMax(ui->spinBox->value());
     voltAxis->setMin(0);
     voltAxis->setTickCount(6);
@@ -55,7 +55,6 @@ void QVoltMeter::initChart() noexcept {
     voltChart->addAxis(voltAxis, Qt::AlignLeft);
     series.attachAxis(voltAxis);
 
-    timeAxis = new QValueAxis();
     timeAxis->setMax(100);
     timeAxis->setMin(0);
     timeAxis->setTickCount(2);
@@ -181,8 +180,15 @@ void QVoltMeter::on_comboBox_activated(int index)
                      this, SLOT(addPointToChart(double)));
     QObject::connect(this, SIGNAL(notifyMaxRange(int)),
                      pMeterSession->getSender(), SLOT(setMaxRange(int)));
+    QObject::connect(this->ui->checkBox, SIGNAL(stateChanged(int)),
+                     pMeterSession->getSender(), SLOT(setEnableMistakeCtrl(int)));
+
     pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
+    pMeterSession->getSender()->setEnableMistakeCtrl(ui->checkBox->checkState());
     pMeterPort->connectReadEvent(pMeterSession);
+
+    if(!canUpdateChart)
+        on_btnCtrlChart_clicked();
 
     spdlog::info("{} Port status: {}",
                  pMeterPort->getPortName(),
