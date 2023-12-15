@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>毫伏电压表</string>
+   <string>主轴支承件测振测温软件</string>
   </property>
   <widget class="QPushButton" name="btnFullCal">
    <property name="geometry">
@@ -67,7 +67,7 @@
     <rect>
      <x>10</x>
      <y>42</y>
-     <width>211</width>
+     <width>201</width>
      <height>71</height>
     </rect>
    </property>
@@ -91,7 +91,7 @@
     <number>99999</number>
    </property>
    <property name="value">
-    <number>5000</number>
+    <number>2000</number>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -109,7 +109,7 @@
     </font>
    </property>
    <property name="text">
-    <string>最大量程(mV)</string>
+    <string>量程范围(mG)</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnChangeRange">
@@ -141,7 +141,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>220</x>
      <y>90</y>
      <width>41</width>
      <height>21</height>
@@ -153,7 +153,7 @@
     </font>
    </property>
    <property name="text">
-    <string>mV</string>
+    <string>mG</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnPortClose">
@@ -258,7 +258,7 @@
    </property>
    <widget class="QWidget" name="tabChartView">
     <attribute name="title">
-     <string>电压曲线</string>
+     <string>加速度曲线</string>
     </attribute>
     <widget class="QChartView" name="voltChartView">
      <property name="geometry">

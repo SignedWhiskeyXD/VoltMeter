@@ -9,16 +9,16 @@
 #include <spdlog/spdlog.h>
 using namespace itas109;
 
-class SessionSignalSender : public QObject{
+class SessionSignalHandler : public QObject{
     Q_OBJECT
 public:
-    int getMaxRange() const{
-        return maxRange;
-    }
-
     bool isEnableMistakeCtrl() const{
         return enableMistakeCtrl;
     };
+
+    double getCaliberation() const {
+        return this->caliberarion;
+    }
 
 signals:
     void notifyLCD(double val);
@@ -28,6 +28,10 @@ public slots:
         maxRange = newMaxRange;
     };
 
+    void setCaliberation(double newVal) {
+        this->caliberarion = newVal + caliberarion;
+    }
+
     void setEnableMistakeCtrl(int newState){
         enableMistakeCtrl = newState;
         spdlog::warn("Mistake Control {}!",
@@ -35,7 +39,10 @@ public slots:
     }
 
 private:
-    int maxRange = 5000;
+    double caliberarion = 1000;
+
+    int maxRange = 2000;
+
     bool enableMistakeCtrl = false;
 };
 
@@ -51,21 +58,16 @@ public:
 
     void onReadEvent(const char* portName, unsigned int readBufferLen) override;
 
-    SessionSignalSender* getSender(){
+    SessionSignalHandler* getSender(){
         return &sender;
     }
 
 private:
-    void processData(double newVal);
-
-    std::deque<double> recentValBuffer;
-
-    std::deque<double> badValBuffer;
-
     CSerialPort* pListenerPort;
+
     int gain = 0;
-    double recentBufferSum = 0.0;
-    SessionSignalSender sender;
+
+    SessionSignalHandler sender;
 };
 
 

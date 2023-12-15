@@ -49,7 +49,7 @@ void QVoltMeter::initChart() noexcept {
     voltChart->legend()->hide();
 
     voltAxis->setMax(ui->spinBox->value());
-    voltAxis->setMin(0);
+    voltAxis->setMin(-ui->spinBox->value());
     voltAxis->setTickCount(6);
     voltAxis->setTickInterval(1000);
     voltChart->addAxis(voltAxis, Qt::AlignLeft);
@@ -89,7 +89,9 @@ void QVoltMeter::on_btnScan_clicked()
 
 void QVoltMeter::on_btnZeroCal_clicked() const {
     if(warnInvalidPort()) return;
-    pMeterPort->writeData("0", 1);
+    // pMeterPort->writeData("0", 1);
+    notifyCaliberation(ui->lcdNumber->value());
+
     spdlog::warn("Zero Calibration Instructed!");
 }
 
@@ -102,8 +104,9 @@ void QVoltMeter::on_btnFullCal_clicked() const {
 void QVoltMeter::on_btnChangeRange_clicked() {
     int newRange = ui->spinBox->value();
     voltAxis->setMax(newRange);
+    voltAxis->setMin(-newRange);
     notifyMaxRange(newRange);
-    spdlog::warn("New Max Range set: {}mV", newRange);
+    spdlog::warn("New Max Range set: {}mG", newRange);
 }
 
 void QVoltMeter::on_btnCtrlChart_clicked() {
@@ -182,6 +185,8 @@ void QVoltMeter::on_comboBox_activated(int index)
                      pMeterSession->getSender(), SLOT(setMaxRange(int)));
     QObject::connect(this->ui->checkBox, SIGNAL(stateChanged(int)),
                      pMeterSession->getSender(), SLOT(setEnableMistakeCtrl(int)));
+    QObject::connect(this, SIGNAL(notifyCaliberation(double)),
+                     pMeterSession->getSender(), SLOT(setCaliberation(double)));
 
     pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
     pMeterSession->getSender()->setEnableMistakeCtrl(ui->checkBox->checkState());

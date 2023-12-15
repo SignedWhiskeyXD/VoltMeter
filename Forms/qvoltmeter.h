@@ -42,6 +42,8 @@ public:
     signals:
     void notifyMaxRange(int newRange);
 
+    void notifyCaliberation(double newVal) const;
+
     void notifyUpdateSQLTable();
 
 private slots:
