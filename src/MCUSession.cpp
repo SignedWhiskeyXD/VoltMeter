@@ -1,7 +1,7 @@
-#include "VoltMeterSession.h"
+#include "MCUSession.h"
 #include <spdlog/spdlog.h>
 
-void VoltMeterSession::onReadEvent(const char* portName, unsigned int readBufferLen)
+void MCUSession::onReadEvent(const char* portName, unsigned int readBufferLen)
 {
     if (readBufferLen > 0)
     {

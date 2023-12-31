@@ -2,11 +2,11 @@
 // Created by WhiskeyXD on 2023/6/18.
 //
 
-#include "qvoltmeter.h"
+#include "MySensorApp.h"
 #include "ui_QVoltMeter.h"
 
 
-QVoltMeter::QVoltMeter(QWidget *parent) :
+MySensorApp::MySensorApp(QWidget *parent) :
         QWidget(parent), ui(new Ui::QVoltMeter), voltChart(new QChart()),
         voltAxis(new QValueAxis()), timeAxis(new QValueAxis()) {
     ui->setupUi(this);
@@ -25,7 +25,7 @@ QVoltMeter::QVoltMeter(QWidget *parent) :
                      this, SLOT(UpdateSQLTable()));
 }
 
-QVoltMeter::~QVoltMeter() {
+MySensorApp::~MySensorApp() {
     delete ui;
     delete voltChart;
     delete voltAxis;
@@ -35,7 +35,7 @@ QVoltMeter::~QVoltMeter() {
     delete pMeterSession;
 }
 
-void QVoltMeter::loadSQLTags() noexcept {
+void MySensorApp::loadSQLTags() noexcept {
     auto tags = sqlHandler.SelectTags();
     ui->comboSQLTags->clear();
     for(const auto& tagStr : tags){
@@ -44,7 +44,7 @@ void QVoltMeter::loadSQLTags() noexcept {
     spdlog::info("Loaded {} Record Tags From Database", tags.size());
 }
 
-void QVoltMeter::initChart() noexcept {
+void MySensorApp::initChart() noexcept {
     voltChart->addSeries(&series);
     voltChart->legend()->hide();
 
@@ -66,18 +66,18 @@ void QVoltMeter::initChart() noexcept {
     ui->voltChartView->setChart(voltChart);
 }
 
-void QVoltMeter::setLCDValue(double accVal, double tempVal)
+void MySensorApp::setLCDValue(double accVal, double tempVal)
 {
-    static char ValStr[10];
+    static char valStr[10];
 
-    std::snprintf(ValStr,10, "%.3lf", accVal);
-    ui->lcdNumber->display(ValStr);
+    std::snprintf(valStr,10, "%.3lf", accVal);
+    ui->lcdNumber->display(valStr);
 
-    std::snprintf(ValStr,10, "%.2lf", tempVal);
-    ui->lcdTemp->display(ValStr);
+    std::snprintf(valStr,10, "%.2lf", tempVal);
+    ui->lcdTemp->display(valStr);
 }
 
-void QVoltMeter::on_btnScan_clicked()
+void MySensorApp::on_btnScan_clicked()
 {
     spdlog::info("Scanning for Serial Devices...");
     availableDevices = CSerialPortInfo::availablePortInfos();
@@ -91,21 +91,20 @@ void QVoltMeter::on_btnScan_clicked()
     spdlog::info("Found {} available", availableDevices.size());
 }
 
-void QVoltMeter::on_btnZeroCal_clicked() const {
+void MySensorApp::on_btnZeroCal_clicked() const {
     if(warnInvalidPort()) return;
-    // pMeterPort->writeData("0", 1);
     notifyCaliberation(ui->lcdNumber->value());
 
     spdlog::warn("Zero Calibration Instructed!");
 }
 
-void QVoltMeter::on_btnFullCal_clicked() const {
+void MySensorApp::on_btnFullCal_clicked() const {
     if(warnInvalidPort()) return;
     pMeterPort->writeData("1", 1);
     spdlog::warn("Full Calibration Instructed!");
 }
 
-void QVoltMeter::on_btnChangeRange_clicked() {
+void MySensorApp::on_btnChangeRange_clicked() {
     int newRange = ui->spinBox->value();
     voltAxis->setMax(newRange);
     voltAxis->setMin(-newRange);
@@ -113,7 +112,7 @@ void QVoltMeter::on_btnChangeRange_clicked() {
     spdlog::warn("New Max Range set: {}mG", newRange);
 }
 
-void QVoltMeter::on_btnCtrlChart_clicked() {
+void MySensorApp::on_btnCtrlChart_clicked() {
     //停止示波器
     if(canUpdateChart){
         canUpdateChart = false;
@@ -129,7 +128,7 @@ void QVoltMeter::on_btnCtrlChart_clicked() {
     }
 }
 
-void QVoltMeter::on_btnPortClose_clicked() {
+void MySensorApp::on_btnPortClose_clicked() {
     SQLCanRecord = false;
     ui->editSQLTag->setReadOnly(false);
     ui->spinBoxWait->setReadOnly(false);
@@ -142,7 +141,7 @@ void QVoltMeter::on_btnPortClose_clicked() {
     ui->lcdTemp->display(0);
 }
 
-void QVoltMeter::addPointToChart(double accVal, double tempVal) {
+void MySensorApp::addPointToChart(double accVal, double tempVal) {
     if(!canUpdateChart) return;
 
     if(series.count() > timeAxis->max() - timeAxis->min()) {
@@ -157,7 +156,7 @@ void QVoltMeter::addPointToChart(double accVal, double tempVal) {
     ui->voltChartView->update();
 }
 
-void QVoltMeter::on_comboBox_activated(int index)
+void MySensorApp::on_comboBox_activated(int index)
 {
     if(pMeterPort != nullptr && strcmp(pMeterPort->getPortName(), availableDevices[index].portName) == 0)
         return;
@@ -180,18 +179,15 @@ void QVoltMeter::on_comboBox_activated(int index)
         QMessageBox::warning(nullptr, "警告", "串口正在使用！", QMessageBox::Ok);
     }
 
-    pMeterSession = new VoltMeterSession(pMeterPort);
+    pMeterSession = new MCUSession(pMeterPort);
 
     QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double, double)),
                      this, SLOT(setLCDValue(double, double)));
     QObject::connect(pMeterSession->getSender(), SIGNAL(notifyLCD(double, double)),
                      this, SLOT(addPointToChart(double, double)));
-    QObject::connect(this, SIGNAL(notifyMaxRange(int)),
-                     pMeterSession->getSender(), SLOT(setMaxRange(int)));
     QObject::connect(this, SIGNAL(notifyCaliberation(double)),
                      pMeterSession->getSender(), SLOT(setCaliberation(double)));
 
-    pMeterSession->getSender()->setMaxRange(ui->spinBox->value());
     pMeterPort->connectReadEvent(pMeterSession);
 
     if(!canUpdateChart)
@@ -205,12 +201,11 @@ void QVoltMeter::on_comboBox_activated(int index)
                  pMeterSession == nullptr ? "Not Ready" : "Standing By");
 }
 
-void QVoltMeter::disconnectPort() noexcept
+void MySensorApp::disconnectPort() noexcept
 {
     QObject::disconnect(this, SLOT(setLCDValue(double, double)));
     QObject::disconnect(this, SLOT(addPointToChart(double, double)));
     if(pMeterSession != nullptr){
-        QObject::disconnect(pMeterSession->getSender(), SLOT(setMaxRange(int)));
     }
 
     if(pMeterPort != nullptr){
@@ -224,7 +219,7 @@ void QVoltMeter::disconnectPort() noexcept
     pMeterPort = nullptr;
 }
 
-bool QVoltMeter::warnInvalidPort() const
+bool MySensorApp::warnInvalidPort() const
 {
     if(pMeterPort == nullptr){
         spdlog::warn("Serial Port NOT initialized");
@@ -239,7 +234,7 @@ bool QVoltMeter::warnInvalidPort() const
     return false;
 }
 
-void QVoltMeter::on_btnSQLRecord_clicked() {
+void MySensorApp::on_btnSQLRecord_clicked() {
     if(ui->editSQLTag->text().length() == 0){
         QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
         return;
@@ -258,19 +253,19 @@ void QVoltMeter::on_btnSQLRecord_clicked() {
         ui->btnSQLRecord->setText("停止记录");
 
         SQLCanRecord = true;
-        std::thread threadSQLRecord(&QVoltMeter::taskSQLRecord, this);
+        std::thread threadSQLRecord(&MySensorApp::taskSQLRecord, this);
         threadSQLRecord.detach();
     }
 }
 
-void QVoltMeter::on_btnSQLRecordNow_clicked(){
+void MySensorApp::on_btnSQLRecordNow_clicked(){
     if(ui->editSQLTag->text().length() == 0){
         QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
         return;
     }
     if(warnInvalidPort()) return;
 
-    SQLVoltRecord newRecord(
+    SQLSensorRecord newRecord(
             ui->editSQLTag->text().toStdString(),
             SQLHandler::getCurrentTime(),
             ui->lcdNumber->value(),
@@ -280,11 +275,11 @@ void QVoltMeter::on_btnSQLRecordNow_clicked(){
     loadSQLTags();
 }
 
-void QVoltMeter::taskSQLRecord() {
+void MySensorApp::taskSQLRecord() {
     bool isSQLTagsUpdated = false;
 
     while(SQLCanRecord){
-        SQLVoltRecord newRecord(
+        SQLSensorRecord newRecord(
                 ui->editSQLTag->text().toStdString(),
                 SQLHandler::getCurrentTime(),
                 ui->lcdNumber->value(),
@@ -300,17 +295,17 @@ void QVoltMeter::taskSQLRecord() {
     }
 }
 
-void QVoltMeter::on_btnSQLQuery_clicked() {
+void MySensorApp::on_btnSQLQuery_clicked() {
     if(ui->comboSQLTags->currentText().length() == 0){
         QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
         return;
     }
-    std::thread threadSQLQuery(&QVoltMeter::taskSQLQueryByTag, this);
+    std::thread threadSQLQuery(&MySensorApp::taskSQLQueryByTag, this);
     threadSQLQuery.detach();
     ui->tabWidget->setCurrentIndex(1);
 }
 
-void QVoltMeter::on_btnSQLDelete_clicked() {
+void MySensorApp::on_btnSQLDelete_clicked() {
     if(ui->comboSQLTags->currentText().length() == 0){
         QMessageBox::warning(nullptr, "警告", "数据标签不可为空！", QMessageBox::Ok);
         return;
@@ -320,14 +315,14 @@ void QVoltMeter::on_btnSQLDelete_clicked() {
     loadSQLTags();
 }
 
-void QVoltMeter::taskSQLQueryByTag() {
+void MySensorApp::taskSQLQueryByTag() {
     queryResults = sqlHandler.SelectRecordByTag(ui->comboSQLTags->currentText().toStdString());
     spdlog::info("Query by tag compelte, recieve {} rows", queryResults.size());
 
     notifyUpdateSQLTable();
 }
 
-void QVoltMeter::UpdateSQLTable() {
+void MySensorApp::UpdateSQLTable() {
     delete pTableModel;
     pTableModel = new QStandardItemModel;
     pTableModel->setRowCount((int)queryResults.size());

@@ -32,13 +32,13 @@ public:
         return ret;
     }
 
-    bool InsertOneRecord(SQLVoltRecord& newRecord);
+    bool InsertOneRecord(SQLSensorRecord& newRecord);
 
     bool RemoveRecordByTag(std::string tag);
 
     std::vector<std::string> SelectTags();
 
-    std::vector<SQLVoltRecord> SelectRecordByTag(std::string tag);
+    std::vector<SQLSensorRecord> SelectRecordByTag(std::string tag);
 
 private:
     Poco::Data::Session session;

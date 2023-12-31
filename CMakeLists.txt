@@ -19,8 +19,8 @@ find_package(Poco COMPONENTS
 find_package(CSerialPort REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-add_executable(QVoltMeter src/main.cpp Forms/qvoltmeter.cpp Forms/qvoltmeter.h Forms/qvoltmeter.ui
-        include/VoltMeterSession.h src/VoltMeterSession.cpp src/SQLHandler.cpp)
+add_executable(QVoltMeter src/main.cpp Forms/MySensorApp.cpp Forms/MySensorApp.h Forms/qvoltmeter.ui
+        include/MCUSession.h src/MCUSession.cpp src/SQLHandler.cpp)
 target_link_libraries(QVoltMeter
         Qt::Core
         Qt::Gui

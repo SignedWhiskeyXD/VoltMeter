@@ -22,7 +22,7 @@
 #include <CSerialPort/SerialPortInfo.h>
 #include <spdlog/spdlog.h>
 
-#include "VoltMeterSession.h"
+#include "MCUSession.h"
 #include "SQLHandler.h"
 using namespace itas109;
 
@@ -31,13 +31,13 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class QVoltMeter; }
 QT_END_NAMESPACE
 
-class QVoltMeter : public QWidget {
+class MySensorApp : public QWidget {
 Q_OBJECT
 
 public:
-    explicit QVoltMeter(QWidget *parent = nullptr);
+    explicit MySensorApp(QWidget *parent = nullptr);
 
-    ~QVoltMeter() override;
+    ~MySensorApp() override;
 
     signals:
     void notifyMaxRange(int newRange);
@@ -102,11 +102,11 @@ private:
 
     CSerialPort *pMeterPort = nullptr;
 
-    VoltMeterSession *pMeterSession = nullptr;
+    MCUSession *pMeterSession = nullptr;
 
     std::vector<SerialPortInfo> availableDevices;
 
-    std::vector<SQLVoltRecord> queryResults;
+    std::vector<SQLSensorRecord> queryResults;
 
     SQLHandler sqlHandler;
 

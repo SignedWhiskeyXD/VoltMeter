@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <Poco/Data/SQLite/Connector.h>
-#include "qvoltmeter.h"
-#include "VoltMeterSession.h"
+#include "MySensorApp.h"
+#include "MCUSession.h"
 
 
 int main(int argc, char *argv[]) {
@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     QApplication::setStyle("fusion");
     Poco::Data::SQLite::Connector::registerConnector();
 
-    QVoltMeter qVoltMeter;
+    MySensorApp qVoltMeter;
     qVoltMeter.setMinimumSize(640, 360);
     qVoltMeter.setMaximumSize(640, 360);
 

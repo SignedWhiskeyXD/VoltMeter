@@ -11,11 +11,11 @@
 #include <string>
 #include <utility>
 
-struct SQLVoltRecord{
-    SQLVoltRecord():
+struct SQLSensorRecord{
+    SQLSensorRecord():
         id(0), value(0.0), temp(0.0) {}
 
-    SQLVoltRecord(std::string tagStr, const Poco::DateTime& time, double val, double tempVal):
+    SQLSensorRecord(std::string tagStr, const Poco::DateTime& time, double val, double tempVal):
         id(0), tag(std::move(tagStr)), recordTime(time), value(val), temp(tempVal) {}
 
     int id;
@@ -28,14 +28,14 @@ struct SQLVoltRecord{
 namespace Poco::Data{
 
     template<>
-    class TypeHandler<SQLVoltRecord>{
+    class TypeHandler<SQLSensorRecord>{
     public:
         static std::size_t size()
         {
             return 5;
         }
 
-        static void bind(std::size_t pos, const SQLVoltRecord& voltRecord,
+        static void bind(std::size_t pos, const SQLSensorRecord& voltRecord,
                          AbstractBinder::Ptr pBinder, AbstractBinder::Direction dir)
         {
             TypeHandler<int>::bind(pos++, voltRecord.id, pBinder, dir);
@@ -45,8 +45,8 @@ namespace Poco::Data{
             TypeHandler<double>::bind(pos++, voltRecord.temp, pBinder, dir);
         }
 
-        static void extract(std::size_t pos, SQLVoltRecord& voltRecord,
-                            const SQLVoltRecord& deflt, AbstractExtractor::Ptr pExtr)
+        static void extract(std::size_t pos, SQLSensorRecord& voltRecord,
+                            const SQLSensorRecord& deflt, AbstractExtractor::Ptr pExtr)
         {
             TypeHandler<int>::extract(pos++, voltRecord.id, deflt.id, pExtr);
             TypeHandler<std::string>::extract(pos++, voltRecord.tag, deflt.tag, pExtr);
@@ -55,7 +55,7 @@ namespace Poco::Data{
             TypeHandler<double>::extract(pos++, voltRecord.temp, deflt.temp, pExtr);
         }
 
-        static void prepare(std::size_t pos, const SQLVoltRecord& voltRecord, AbstractPreparator::Ptr pPrep)
+        static void prepare(std::size_t pos, const SQLSensorRecord& voltRecord, AbstractPreparator::Ptr pPrep)
         {
             TypeHandler<int>::prepare(pos++, voltRecord.id, pPrep);
             TypeHandler<std::string>::prepare(pos++, voltRecord.tag, pPrep);

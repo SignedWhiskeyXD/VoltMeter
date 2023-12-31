@@ -21,9 +21,7 @@ signals:
     void notifyLCD(double accVal, double tempVal);
 
 public slots:
-    void setMaxRange(int newMaxRange){
-        maxRange = newMaxRange;
-    };
+    ;
 
     void setCaliberation(double newVal) {
         this->caliberarion = newVal + caliberarion;
@@ -31,13 +29,11 @@ public slots:
 
 private:
     double caliberarion = 1000;
-
-    int maxRange = 2000;
 };
 
-class VoltMeterSession : public CSerialPortListener{
+class MCUSession : public CSerialPortListener{
 public:
-    explicit VoltMeterSession(CSerialPort* sp) :
+    explicit MCUSession(CSerialPort* sp) :
         pListenerPort(sp){}
 
     void onReadEvent(const char* portName, unsigned int readBufferLen) override;
@@ -48,8 +44,6 @@ public:
 
 private:
     CSerialPort* pListenerPort;
-
-    int gain = 0;
 
     SessionSignalHandler sender;
 };

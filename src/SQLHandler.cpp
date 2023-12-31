@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 #include "SQLHandler.h"
 
-bool SQLHandler::InsertOneRecord(SQLVoltRecord& newRecord) {
+bool SQLHandler::InsertOneRecord(SQLSensorRecord& newRecord) {
     try{
         session << "INSERT INTO sensorRecord (tag, recordTime, value, temp) VALUES(?, ?, ?, ?)",
                 use(newRecord.tag),
@@ -34,8 +34,8 @@ std::vector<std::string> SQLHandler::SelectTags() {
     return ret;
 }
 
-std::vector<SQLVoltRecord> SQLHandler::SelectRecordByTag(std::string tag) {
-    std::vector<SQLVoltRecord> ret;
+std::vector<SQLSensorRecord> SQLHandler::SelectRecordByTag(std::string tag) {
+    std::vector<SQLSensorRecord> ret;
     try{
         session << "SELECT * FROM sensorRecord WHERE tag = ?",
                 use(tag),
