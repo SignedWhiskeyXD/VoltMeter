@@ -15,7 +15,9 @@ void MCUSession::onReadEvent(const char* portName, unsigned int readBufferLen)
             int16_t rawVal = (data[4] << 8) + data[5];
             // spdlog::info("raw val: {}, {:#x}, {:#x}", rawVal, data[4], data[5]);
             uint16_t rawTemp = (data[2] << 8) + data[3];
-            const double convertVal = rawVal * (1000.0 / 256) - sender.getCaliberation();
+            double convertVal = rawVal * (1000.0 / 256) - sender.getCaliberation();
+
+            if(std::abs(convertVal) < 10.0) convertVal = 0;
 
             sender.notifyLCD(convertVal, rawTemp / 4.0);
         }

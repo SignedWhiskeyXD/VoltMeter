@@ -28,7 +28,7 @@ public slots:
     }
 
 private:
-    double caliberarion = 1000;
+    double caliberarion = 0.0;
 };
 
 class MCUSession : public CSerialPortListener{

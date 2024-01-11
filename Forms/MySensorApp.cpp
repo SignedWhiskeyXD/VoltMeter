@@ -174,6 +174,7 @@ void MySensorApp::on_comboBox_activated(int index)
             4096
     );
     pMeterPort->setReadIntervalTimeout(0);
+    pMeterPort->setMinByteReadNotify(6);
     if(!pMeterPort->open()) {
         spdlog::warn("Failed to open {}", pMeterPort->getPortName());
         QMessageBox::warning(nullptr, "警告", "串口正在使用！", QMessageBox::Ok);
